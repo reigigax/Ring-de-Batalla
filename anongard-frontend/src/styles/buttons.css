@@ -4,9 +4,9 @@
 .button {
   --main-size: 1em;
   --color-text: #ffffff;
-  --color-background: #667eea;
-  --color-background-hover: #5568d3;
-  --color-outline: #667eea40;
+  --color-background: #3A7CA5;
+  --color-background-hover: #2d6280;
+  --color-outline: #3A7CA540;
   --color-shadow: #00000040;
   cursor: pointer;
   display: flex;
@@ -100,9 +100,9 @@
 .button.primary,
 .btn-primary {
   --color-text: #ffffff;
-  --color-background: #667eea;
-  --color-background-hover: #5568d3;
-  --color-outline: #667eea40;
+  --color-background: #3A7CA5;
+  --color-background-hover: #2d6280;
+  --color-outline: #3A7CA540;
 }
 
 /* Secondary Button */
@@ -117,9 +117,9 @@
 /* Success Button */
 .button.success {
   --color-text: #ffffff;
-  --color-background: #10b981;
-  --color-background-hover: #059669;
-  --color-outline: #10b98140;
+  --color-background: #8FD19E;
+  --color-background-hover: #7bc28c;
+  --color-outline: #8FD19E40;
 }
 
 /* Danger Button */
@@ -127,17 +127,17 @@
 .logout-btn,
 .logout-btn-header {
   --color-text: #ffffff;
-  --color-background: #ef4444;
-  --color-background-hover: #dc2626;
-  --color-outline: #ef444440;
+  --color-background: #F8AFA6;
+  --color-background-hover: #f59890;
+  --color-outline: #F8AFA640;
 }
 
 /* Back Button */
 .back-button {
   --color-text: #ffffff;
-  --color-background: #667eea;
-  --color-background-hover: #5568d3;
-  --color-outline: #667eea40;
+  --color-background: #3A7CA5;
+  --color-background-hover: #2d6280;
+  --color-outline: #3A7CA540;
 }
 
 /* Google Button */
@@ -159,9 +159,9 @@
 /* Auth Buttons */
 .auth-button {
   --color-text: #ffffff;
-  --color-background: #667eea;
-  --color-background-hover: #5568d3;
-  --color-outline: #667eea40;
+  --color-background: #3A7CA5;
+  --color-background-hover: #2d6280;
+  --color-outline: #3A7CA540;
   width: 100%;
   padding: 0.5em 1em;
   gap: 12px;
@@ -206,9 +206,11 @@
   0% {
     opacity: 1;
   }
+
   50% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -218,9 +220,11 @@
   0% {
     background: var(--color-background);
   }
+
   50% {
     background: var(--color-background-hover);
   }
+
   100% {
     background: var(--color-background);
   }
@@ -231,10 +235,12 @@
     outline: 0em solid transparent;
     outline-offset: -0.1em;
   }
+
   50% {
     outline: 0.2em solid var(--color-outline);
     outline-offset: 0.2em;
   }
+
   100% {
     outline: 0.4em solid transparent;
     outline-offset: 0.4em;
@@ -246,7 +252,7 @@
   .button {
     --main-size: 0.9em;
   }
-  
+
   .auth-button {
     padding: 0.4em 0.8em;
   }

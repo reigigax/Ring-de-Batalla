@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../styles/Login.css'
+import anongardLogo from '../assets/anongard-logo.png'
+
 
 export function Login() {
   const navigate = useNavigate()
@@ -36,19 +38,12 @@ export function Login() {
         {/* Logo y Título */}
         <div className="login-header">
           <div className="login-logo">
-            <svg
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
+            <img
+              src={anongardLogo}
+              alt="AnonGard Logo"
               className="shield-icon"
-            >
-              <path
-                d="M50 10L80 25V50C80 70 50 85 50 85C50 85 20 70 20 50V25L50 10Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <circle cx="50" cy="50" r="8" fill="currentColor" />
-            </svg>
+              style={{ width: '80px', height: 'auto' }}
+            />
           </div>
           <h1 className="login-title">Ring de Batalla</h1>
           <p className="login-subtitle">AnonGard - Espacio Seguro para Debatir</p>

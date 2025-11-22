@@ -55,8 +55,8 @@
 .form-group input[type="text"]:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #3A7CA5;
+  box-shadow: 0 0 0 3px rgba(58, 124, 165, 0.1);
 }
 
 .form-group input[type="text"]:disabled,
@@ -100,7 +100,7 @@
 }
 
 .room-type-option:hover {
-  border-color: #667eea;
+  border-color: #3A7CA5;
   background: #f8fafc;
 }
 
@@ -116,12 +116,12 @@
   opacity: 0.5;
 }
 
-.room-type-option input[type="radio"]:checked + .type-label {
-  color: #667eea;
+.room-type-option input[type="radio"]:checked+.type-label {
+  color: #3A7CA5;
 }
 
-.room-type-option input[type="radio"]:checked ~ * {
-  color: #667eea;
+.room-type-option input[type="radio"]:checked~* {
+  color: #3A7CA5;
 }
 
 .type-label {
@@ -149,8 +149,8 @@
   color: #9ca3af;
 }
 
-.room-type-option input[type="radio"]:checked + .type-label .type-name {
-  color: #667eea;
+.room-type-option input[type="radio"]:checked+.type-label .type-name {
+  color: #3A7CA5;
 }
 
 /* Error Message */

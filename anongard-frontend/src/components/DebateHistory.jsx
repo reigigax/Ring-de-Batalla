@@ -55,10 +55,8 @@ export function DebateHistory() {
       {/* Header */}
       <div className="history-header">
         <button className="button back-button" onClick={() => navigate('/home')}>
-          <svg viewBox="0 0 66 43">
-            <polygon points="39.58,4.46 44.11,0 66,21.5 44.11,43 39.58,38.54 56.94,21.5"></polygon>
-            <polygon points="19.79,4.46 24.32,0 46.21,21.5 24.32,43 19.79,38.54 37.15,21.5"></polygon>
-            <polygon points="0,4.46 4.53,0 26.42,21.5 4.53,43 0,38.54 17.36,21.5"></polygon>
+          <svg viewBox="0 0 24 24">
+            <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
           </svg>
           <span>Volver</span>
         </button>
@@ -99,7 +97,7 @@ export function DebateHistory() {
           <div className="stat-card">
             <div className="stat-icon duration-icon">
               <svg viewBox="0 0 24 24">
-                <path fill="currentColor" d="M11.99 5V1h-1v4H8.01V1H7v4H3.99V1h-1v4H1v1h2v3H1v1h2v3H1v1h2v4H1v1h2v3h1v-3h3.99v3h1v-3H16v3h1v-3h4v-1h-4v-3h4v-1h-4v-3h4V9h-4V5h4V4h-4v3h-1V5h-3.01V1h-1v4zm-7 3h14v10H4V8z" />
+                <path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
               </svg>
             </div>
             <div className="stat-details">
@@ -130,7 +128,7 @@ export function DebateHistory() {
                 <div className="debate-meta">
                   <div className="meta-item">
                     <svg viewBox="0 0 24 24">
-                      <path fill="currentColor" d="M11.99 5V1h-1v4H8.01V1H7v4H3.99V1h-1v4H1v1h2v3H1v1h2v3H1v1h2v4H1v1h2v3h1v-3h3.99v3h1v-3H16v3h1v-3h4v-1h-4v-3h4v-1h-4v-3h4V9h-4V5h4V4h-4v3h-1V5h-3.01V1h-1v4zm-7 3h14v10H4V8z" />
+                      <path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
                     </svg>
                     <span>{debate.duration}</span>
                   </div>

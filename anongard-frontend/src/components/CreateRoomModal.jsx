@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { ConfirmModal } from './ConfirmModal'
 import '../styles/CreateRoomModal.css'
 
+
 export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
   const { user } = useAuth()
   const [roomName, setRoomName] = useState('')
@@ -54,7 +55,7 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
       }
 
       onCreateRoom(newRoom)
-      
+
       // Reset form
       setRoomName('')
       setRoomDescription('')

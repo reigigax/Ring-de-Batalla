@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext'
 import { ConfirmModal } from './ConfirmModal'
 import { CreateRoomModal } from './CreateRoomModal'
 import '../styles/Dashboard.css'
+import anongardLogo from '../assets/anongard-logo.png'
+
 
 export function Dashboard() {
   const navigate = useNavigate()
@@ -72,19 +74,12 @@ export function Dashboard() {
           </button>
 
           <div className="app-title">
-            <svg
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
-              className="header-shield-icon"
-            >
-              <path
-                d="M50 10L80 25V50C80 70 50 85 50 85C50 85 20 70 20 50V25L50 10Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <circle cx="50" cy="50" r="8" fill="currentColor" />
-            </svg>
+            <img
+              src={anongardLogo}
+              alt="AnonGard Logo"
+              className="shield-icon"
+              style={{ width: '80px', height: 'auto' }}
+            />
             <h1>Ring de Batalla</h1>
           </div>
 
@@ -122,8 +117,8 @@ export function Dashboard() {
         <div className="dashboard-content">
           {/* Welcome Section */}
           <section className="welcome-section">
-            <h2>Bienvenido/a, {user?.name}!</h2>
-            <p>¡Haz ingresado exitosamente a Ring de Batalla - AnonGard</p>
+            <h2>👋 ¡Bienvenido/a, {user?.name}!</h2>
+            <p>✨ Has ingresado exitosamente a Ring de Batalla - AnonGard</p>
           </section>
 
           {/* Rooms Section */}
@@ -210,7 +205,7 @@ export function Dashboard() {
           {/* Create Room Section - Only for Teachers */}
           {user?.role === 'teacher' && (
             <section className="create-room-section">
-              <h3>Opciones de Moderador</h3>
+              <h3>👨‍🏫 Opciones de Moderador</h3>
               <div className="create-room-card">
                 <div className="create-room-content">
                   <svg viewBox="0 0 24 24" className="create-icon">
@@ -230,26 +225,35 @@ export function Dashboard() {
 
           {/* Security Section */}
           <section className="security-section">
-            <h3>Seguridad y Privacidad</h3>
+            <div className="security-header">
+              <h3>Seguridad y Privacidad</h3>
+              <p className="security-subtitle">Tu información está protegida en todo momento</p>
+            </div>
             <div className="security-cards">
               <div className="security-card">
-                <svg viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                </svg>
+                <div className="security-icon-wrapper">
+                  <svg viewBox="0 0 24 24" className="security-icon">
+                    <path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
+                  </svg>
+                </div>
                 <h4>Datos Protegidos</h4>
                 <p>Tu información está cifrada y protegida según normativas de privacidad</p>
               </div>
               <div className="security-card">
-                <svg viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                </svg>
+                <div className="security-icon-wrapper">
+                  <svg viewBox="0 0 24 24" className="security-icon">
+                    <path fill="currentColor" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
+                  </svg>
+                </div>
                 <h4>Sin Grabaciones</h4>
                 <p>No se almacenan grabaciones de audio o video de los debates</p>
               </div>
               <div className="security-card">
-                <svg viewBox="0 0 24 24">
-                  <path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                </svg>
+                <div className="security-icon-wrapper">
+                  <svg viewBox="0 0 24 24" className="security-icon">
+                    <path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
+                  </svg>
+                </div>
                 <h4>Datos Efímeros</h4>
                 <p>Las transcripciones se procesan y eliminan automáticamente</p>
               </div>

@@ -17,6 +17,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -38,6 +39,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -94,21 +96,21 @@
 }
 
 .modal-confirm {
-  background: #667eea;
+  background: #3A7CA5;
   color: white;
 }
 
 .modal-confirm:hover {
-  background: #5568d3;
+  background: #2d6280;
   transform: translateY(-1px);
 }
 
 .modal-confirm.dangerous {
-  background: #ef4444;
+  background: #F8AFA6;
 }
 
 .modal-confirm.dangerous:hover {
-  background: #dc2626;
+  background: #f59890;
 }
 
 .modal-confirm:active {

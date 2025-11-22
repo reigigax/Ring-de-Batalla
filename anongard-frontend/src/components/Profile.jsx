@@ -17,19 +17,15 @@ export function Profile() {
       <header className="profile-header">
         <div className="profile-header-content">
           <button className="button back-button" onClick={() => navigate('/home')}>
-            <svg viewBox="0 0 66 43">
-              <polygon points="39.58,4.46 44.11,0 66,21.5 44.11,43 39.58,38.54 56.94,21.5"></polygon>
-              <polygon points="19.79,4.46 24.32,0 46.21,21.5 24.32,43 19.79,38.54 37.15,21.5"></polygon>
-              <polygon points="0,4.46 4.53,0 26.42,21.5 4.53,43 0,38.54 17.36,21.5"></polygon>
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
             </svg>
             <span>Volver</span>
           </button>
           <h1>Mi Perfil</h1>
-          <button className="button danger logout-btn" onClick={handleLogout}>
-            <svg viewBox="0 0 66 43">
-              <polygon points="39.58,4.46 44.11,0 66,21.5 44.11,43 39.58,38.54 56.94,21.5"></polygon>
-              <polygon points="19.79,4.46 24.32,0 46.21,21.5 24.32,43 19.79,38.54 37.15,21.5"></polygon>
-              <polygon points="0,4.46 4.53,0 26.42,21.5 4.53,43 0,38.54 17.36,21.5"></polygon>
+          <button className="button logout-btn" onClick={handleLogout}>
+            <svg viewBox="0 0 24 24">
+              <path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
             </svg>
             <span>Salir</span>
           </button>
@@ -48,7 +44,7 @@ export function Profile() {
                   <h2>{user?.name}</h2>
                   <p className="profile-email">{user?.email}</p>
                   <span className={`profile-role ${user?.role}`}>
-                    {user?.role === 'teacher' ? 'Profesor/a' : 'Estudiante'}
+                    {user?.role === 'teacher' ? '👨‍🏫 Profesor/a' : '🎓 Estudiante'}
                   </span>
                 </div>
               </div>
@@ -56,11 +52,11 @@ export function Profile() {
               <div className="profile-meta">
                 <div className="meta-item">
                   <span className="meta-label">Miembro Desde</span>
-                  <span className="meta-value">Noviembre 2025</span>
+                  <span className="meta-value">Nov 2025</span>
                 </div>
                 <div className="meta-item">
                   <span className="meta-label">Estado</span>
-                  <span className="meta-value status-active">Activo</span>
+                  <span className="meta-value status-active">● Activo</span>
                 </div>
               </div>
             </div>
@@ -93,7 +89,7 @@ export function Profile() {
               <div className="stat-card">
                 <div className="stat-icon time-icon">
                   <svg viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M11.99 5V1h-1v4H8.01V1H7v4H3.99V1h-1v4H1v1h2v3H1v1h2v3H1v1h2v4H1v1h2v3h1v-3h3.99v3h1v-3H16v3h1v-3h4v-1h-4v-3h4v-1h-4v-3h4V9h-4V5h4V4h-4v3h-1V5h-3.01V1h-1v4zm-7 3h14v10H4V8z" />
+                    <path fill="currentColor" d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" />
                   </svg>
                 </div>
                 <span className="stat-label">Tiempo Total</span>
@@ -103,7 +99,7 @@ export function Profile() {
               <div className="stat-card">
                 <div className="stat-icon participants-icon">
                   <svg viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    <path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                   </svg>
                 </div>
                 <span className="stat-label">Participantes Totales</span>
@@ -114,7 +110,7 @@ export function Profile() {
 
           {/* Badges Section */}
           <section className="badges-section">
-            <h3>Logros</h3>
+            <h3>Logros Desbloqueados</h3>
             <div className="badges-grid">
               <div className="badge">
                 <div className="badge-icon">🏆</div>
@@ -150,36 +146,36 @@ export function Profile() {
                 <div className="debate-type-badge general">General</div>
                 <div className="debate-details">
                   <h4>Debate sobre Evaluaciones</h4>
-                  <span className="debate-date">12 Nov 2025</span>
+                  <span className="debate-date">📅 12 Nov 2025</span>
                 </div>
-                <div className="debate-duration">45 min</div>
+                <div className="debate-duration">⏱️ 45 min</div>
               </div>
 
               <div className="debate-item">
                 <div className="debate-type-badge private">Privada</div>
                 <div className="debate-details">
                   <h4>Mediación de Conflicto</h4>
-                  <span className="debate-date">10 Nov 2025</span>
+                  <span className="debate-date">📅 10 Nov 2025</span>
                 </div>
-                <div className="debate-duration">30 min</div>
+                <div className="debate-duration">⏱️ 30 min</div>
               </div>
 
               <div className="debate-item">
                 <div className="debate-type-badge general">General</div>
                 <div className="debate-details">
                   <h4>Planificación Académica</h4>
-                  <span className="debate-date">8 Nov 2025</span>
+                  <span className="debate-date">📅 8 Nov 2025</span>
                 </div>
-                <div className="debate-duration">60 min</div>
+                <div className="debate-duration">⏱️ 60 min</div>
               </div>
 
               <div className="debate-item">
                 <div className="debate-type-badge general">General</div>
                 <div className="debate-details">
                   <h4>Innovación en Educación</h4>
-                  <span className="debate-date">5 Nov 2025</span>
+                  <span className="debate-date">📅 5 Nov 2025</span>
                 </div>
-                <div className="debate-duration">55 min</div>
+                <div className="debate-duration">⏱️ 55 min</div>
               </div>
             </div>
           </section>
@@ -190,24 +186,24 @@ export function Profile() {
             <div className="settings-list">
               <div className="setting-item">
                 <div className="setting-info">
-                  <h4>Notificaciones por Email</h4>
-                  <p>Recibe alertas de nuevos debates</p>
+                  <h4>📧 Notificaciones por Email</h4>
+                  <p>Recibe alertas de nuevos debates y actualizaciones importantes</p>
                 </div>
                 <input type="checkbox" className="toggle" defaultChecked />
               </div>
 
               <div className="setting-item">
                 <div className="setting-info">
-                  <h4>Perfil Público</h4>
-                  <p>Permite que otros vean tu perfil</p>
+                  <h4>👤 Perfil Público</h4>
+                  <p>Permite que otros usuarios vean tu perfil y estadísticas</p>
                 </div>
                 <input type="checkbox" className="toggle" defaultChecked />
               </div>
 
               <div className="setting-item">
                 <div className="setting-info">
-                  <h4>Resúmenes con IA</h4>
-                  <p>Generar resúmenes automáticos de debates</p>
+                  <h4>🤖 Resúmenes con IA</h4>
+                  <p>Generar resúmenes automáticos al finalizar debates</p>
                 </div>
                 <input type="checkbox" className="toggle" defaultChecked />
               </div>

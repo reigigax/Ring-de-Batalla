@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import '../styles/Home.css'
+import anongardLogo from '../assets/anongard-logo.png'
+
 
 export function Home() {
   const navigate = useNavigate()
@@ -17,15 +19,12 @@ export function Home() {
       <header className="home-header">
         <div className="home-header-content">
           <div className="app-logo">
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" className="logo-icon">
-              <path
-                d="M50 10L80 25V50C80 70 50 85 50 85C50 85 20 70 20 50V25L50 10Z"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <circle cx="50" cy="50" r="8" fill="currentColor" />
-            </svg>
+            <img
+              src={anongardLogo}
+              alt="AnonGard Logo"
+              className="logo-icon"
+              style={{ width: '40px', height: 'auto' }}
+            />
             <h1>Ring de Batalla</h1>
           </div>
           <button className="button danger logout-btn-header" onClick={handleLogout}>
@@ -42,23 +41,21 @@ export function Home() {
       {/* Main Content */}
       <main className="home-main">
         <div className="home-content">
-          {/* Welcome Section */}
-          <section className="welcome-section">
-            <div className="welcome-card">
-              <div className="welcome-header">
-                <img src={user?.avatar} alt={user?.name} className="welcome-avatar" />
-                <div className="welcome-info">
-                  <h2>¡Bienvenido/a, {user?.name}!</h2>
-                  <p className="welcome-subtitle">
-                    {user?.role === 'teacher' ? 'Profesor/a' : 'Estudiante'} de AnonGard
-                  </p>
-                </div>
+          {/* Welcome Card */}
+          <div className="welcome-card">
+            <div className="welcome-header">
+              <img src={user?.avatar} alt={user?.name} className="welcome-avatar" />
+              <div className="welcome-info">
+                <h2>👋 ¡Bienvenido/a, {user?.name}!</h2>
+                <p className="welcome-subtitle">
+                  {user?.role === 'teacher' ? '👨‍🏫 Profesor/a' : '🎓 Estudiante'} de AnonGard
+                </p>
               </div>
-              <p className="welcome-description">
-                Bienvenido a Ring de Batalla, la plataforma segura de debates educativos. Accede a tu perfil o comienza a participar en debates.
-              </p>
             </div>
-          </section>
+            <p className="welcome-description">
+              Bienvenido a Ring de Batalla, la plataforma segura de debates educativos. Accede a tu perfil o comienza a participar en debates.
+            </p>
+          </div>
 
           {/* Main Options Grid */}
           <section className="options-section">
@@ -66,16 +63,9 @@ export function Home() {
               {/* Profile Card */}
               <div className="option-card profile-card" onClick={() => navigate('/profile')}>
                 <div className="option-card-inner">
-                  <div className="option-icon profile-icon">
-                    <svg viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                      />
-                    </svg>
-                  </div>
+
                   <div className="option-content">
-                    <h3>Mi Perfil</h3>
+                    <h3>👤 Mi Perfil</h3>
                     <p>Ver y editar tu información personal y estadísticas</p>
                   </div>
                   <div className="option-arrow">
@@ -98,7 +88,7 @@ export function Home() {
                     </svg>
                   </div>
                   <div className="option-content">
-                    <h3>Ring de Batalla</h3>
+                    <h3>🏛️ Ring de Batalla</h3>
                     <p>Accede a debates en vivo y crea nuevas salas</p>
                   </div>
                   <div className="option-arrow">
