@@ -1,0 +1,135 @@
+/* Debate Conditions Modal */
+.debate-conditions-modal {
+    max-width: 600px;
+    width: 95%;
+}
+
+.conditions-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.conditions-icon {
+    width: 48px;
+    height: 48px;
+    color: #3A7CA5;
+    margin-bottom: 8px;
+}
+
+.conditions-header .modal-title {
+    margin: 0;
+}
+
+.room-name {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Conditions Content */
+.conditions-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.conditions-intro {
+    font-size: 14px;
+    color: #4b5563;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.conditions-text {
+    padding: 16px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.conditions-text::-webkit-scrollbar {
+    width: 8px;
+}
+
+.conditions-text::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+.conditions-text::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.conditions-text::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Acceptance Checkbox */
+.conditions-acceptance {
+    padding: 16px;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.acceptance-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.acceptance-checkbox input[type="checkbox"] {
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.acceptance-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400e;
+    line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .debate-conditions-modal {
+        width: 90%;
+    }
+
+    .conditions-text {
+        max-height: 200px;
+        font-size: 13px;
+    }
+
+    .conditions-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .button {
+        width: 100%;
+    }
+}

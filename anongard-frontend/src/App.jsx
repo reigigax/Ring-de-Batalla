@@ -1,35 +1,31 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
-import { Login } from './components/Login'
-import { AuthCallback } from './components/AuthCallback'
-import { Home } from './components/Home'
-import { Profile } from './components/Profile'
-import { Dashboard } from './components/Dashboard'
-import { DebateHistory } from './components/DebateHistory'
-import { ProtectedRoute } from './components/ProtectedRoute'
-import './styles/buttons.css'
-import './App.css'
+import { ProtectedRoute } from './routes/ProtectedRoute'
+import { Login } from './pages/Login/Login'
+import { Dashboard } from './pages/Dashboard/Dashboard'
+import { Home } from './pages/Home/Home'
+import { Profile } from './pages/Profile/Profile'
+import { DebateHistory } from './pages/DebateHistory/DebateHistory'
+import { Ring } from './pages/Ring/Ring'
+import { AuthCallback } from './pages/AuthCallback/AuthCallback'
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
+    <AuthProvider>
+      <Router>
         <Routes>
+          {/* Ruta pública - Login */}
           <Route path="/" element={<Login />} />
+
+          {/* Ruta de callback para OAuth */}
           <Route path="/callback" element={<AuthCallback />} />
+
+          {/* Rutas protegidas */}
           <Route
             path="/home"
             element={
               <ProtectedRoute>
                 <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
               </ProtectedRoute>
             }
           />
@@ -42,6 +38,14 @@ function App() {
             }
           />
           <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/history"
             element={
               <ProtectedRoute>
@@ -49,10 +53,20 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/ring/:roomId"
+            element={
+              <ProtectedRoute>
+                <Ring />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Redirección por defecto */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </AuthProvider>
-    </Router>
+      </Router>
+    </AuthProvider>
   )
 }
 

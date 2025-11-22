@@ -1,0 +1,129 @@
+/* Auth Callback Container */
+.auth-callback-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #3A7CA5 0%, #2d6280 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+        'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.callback-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 48px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    animation: slideUp 0.6s ease-out;
+}
+
+/* Spinner */
+.callback-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e0e7ff;
+    border-top-color: #3A7CA5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 24px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Success Icon */
+.callback-success-icon {
+    width: 64px;
+    height: 64px;
+    background: #8FD19E;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: white;
+    margin: 0 auto 24px;
+    font-weight: bold;
+    animation: scaleIn 0.5s ease-out;
+}
+
+/* Error Icon */
+.callback-error-icon {
+    width: 64px;
+    height: 64px;
+    background: #F8AFA6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: white;
+    margin: 0 auto 24px;
+    font-weight: bold;
+    animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.callback-card h2 {
+    margin: 0 0 12px 0;
+    font-size: 24px;
+    color: #1a1a1a;
+}
+
+.callback-card p {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Button */
+.callback-button {
+    background: #3A7CA5;
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+}
+
+.callback-button:hover {
+    background: #2d6280;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(58, 124, 165, 0.4);
+}
+
+.callback-button:active {
+    transform: translateY(0);
+}
