@@ -15,8 +15,7 @@ export function Login() {
     const handleGoogleLogin = async () => {
         try {
             setLoginError(null)
-            await login('google')
-            navigate('/home')
+            window.location.href = "http://localhost:3000/auth/google";
         } catch (err) {
             setLoginError('Error al iniciar sesión con Google')
             console.error('Error:', err)
