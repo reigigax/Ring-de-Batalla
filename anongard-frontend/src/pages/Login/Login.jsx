@@ -1,36 +1,23 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/common/Button'
 import { LoadingSpinner } from '../../components/common/LoadingSpinner'
-import './Login.css'
 import anongardLogo from '../../assets/anongard-logo.png'
-
+import './Login.css'
 
 export function Login() {
     const navigate = useNavigate()
-    const { login, isLoading, error } = useAuth()
-    const [loginError, setLoginError] = useState(null)
+    const { login, isAuthenticated, isLoading, error } = useAuth()
 
-    const handleGoogleLogin = async () => {
-        try {
-            setLoginError(null)
-            window.location.href = "http://localhost:3000/auth/google";
-        } catch (err) {
-            setLoginError('Error al iniciar sesión con Google')
-            console.error('Error:', err)
-        }
-    }
-
-    const handleMicrosoftLogin = async () => {
-        try {
-            setLoginError(null)
-            await login('microsoft')
+    useEffect(() => {
+        if (isAuthenticated) {
             navigate('/home')
-        } catch (err) {
-            setLoginError('Error al iniciar sesión con Microsoft')
-            console.error('Error:', err)
         }
+    }, [isAuthenticated, navigate]);
+
+    if (isLoading && !isAuthenticated) {
+        return <LoadingSpinner overlay text="Cargando..." />
     }
 
     return (
@@ -61,7 +48,7 @@ export function Login() {
                 <div className="login-buttons">
                     <Button
                         variant="google"
-                        onClick={handleGoogleLogin}
+                        onClick={() => login('google')}
                         disabled={isLoading}
                         className="auth-button"
                         icon={
@@ -94,7 +81,7 @@ export function Login() {
 
                     <Button
                         variant="microsoft"
-                        onClick={handleMicrosoftLogin}
+                        onClick={() => login('google')}
                         disabled={isLoading}
                         className="auth-button"
                         icon={
@@ -115,9 +102,9 @@ export function Login() {
                 </div>
 
                 {/* Mensaje de error */}
-                {loginError && (
+                {error && (
                     <div className="error-indicator">
-                        <p>{loginError}</p>
+                        <p>{error}</p>
                     </div>
                 )}
 

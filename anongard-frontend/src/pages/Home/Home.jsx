@@ -14,6 +14,9 @@ export function Home() {
         navigate('/')
     }
 
+    const userName = user?.displayName || user?.name?.givenName || 'Usuario';
+    const userAvatar = user?.photos?.[0]?.value || `https://ui-avatars.com/api/?name=${userName}&background=3A7CA5&color=fff`
+
     return (
         <div className="home-container">
             {/* Header */}
@@ -44,9 +47,10 @@ export function Home() {
                     {/* Welcome Card */}
                     <div className="welcome-card">
                         <div className="welcome-header">
-                            <img src={user?.avatar} alt={user?.name} className="welcome-avatar" />
+                            <img src={userAvatar} 
+                                alt="Perfil" className="welcome-avatar" />
                             <div className="welcome-info">
-                                <h2>👋 ¡Bienvenido/a, {user?.name}!</h2>
+                                <h2>👋 ¡Bienvenido/a, {userName}!</h2>
                                 <p className="welcome-subtitle">
                                     {user?.role === 'teacher' ? '👨‍🏫 Profesor/a' : '🎓 Estudiante'} de AnonGard
                                 </p>

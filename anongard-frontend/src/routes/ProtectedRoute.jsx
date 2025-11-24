@@ -9,7 +9,9 @@ export function ProtectedRoute({ children }) {
     const { isAuthenticated, isLoading } = useAuth()
 
     if (isLoading) {
-        return <LoadingSpinner />
+        return (
+            <LoadingSpinner size="large" text="Verificando sesión..." />
+        )
     }
 
     if (!isAuthenticated) {

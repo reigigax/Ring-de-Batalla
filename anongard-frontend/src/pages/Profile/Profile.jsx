@@ -12,6 +12,10 @@ export function Profile() {
         navigate('/')
     }
 
+    const userName = user?.displayName || user?.name?.givenName || 'Usuario';
+    const userEmail = user.emails[0].value;
+    const userAvatar = user?.photos?.[0]?.value || `https://ui-avatars.com/api/?name=${userName}&background=3A7CA5&color=fff`
+
     return (
         <div className="profile-container">
             {/* Header */}
@@ -38,10 +42,10 @@ export function Profile() {
                     <section className="profile-section">
                         <div className="profile-card-main">
                             <div className="profile-card-header">
-                                <img src={user?.avatar} alt={user?.name} className="profile-avatar-large" />
+                                <img src={userAvatar} className="profile-avatar-large" />
                                 <div className="profile-card-info">
-                                    <h2>{user?.name}</h2>
-                                    <p className="profile-email">{user?.email}</p>
+                                    <h2>{userName}</h2>
+                                    <p className="profile-email">{userEmail}</p>
                                     <span className={`profile-role ${user?.role}`}>
                                         {user?.role === 'teacher' ? '👨‍🏫 Profesor/a' : '🎓 Estudiante'}
                                     </span>

@@ -8,6 +8,8 @@ export function DebateHistory() {
     const navigate = useNavigate()
     const { user } = useAuth()
 
+    const userName = user?.displayName || user?.name?.givenName || 'Usuario';
+
     return (
         <div className="history-container">
             {/* Header */}
@@ -25,7 +27,7 @@ export function DebateHistory() {
                 </Button>
                 <h1>Historial de Debates</h1>
                 <p className="user-info">
-                    Viendo historial de: <strong>{user?.name}</strong>
+                    Viendo historial de: <strong>{userName}</strong>
                 </p>
             </header>
 

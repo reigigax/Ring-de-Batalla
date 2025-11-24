@@ -161,6 +161,9 @@ export function Dashboard() {
     const [showCreateRoomModal, setShowCreateRoomModal] = useState(false)
     const [rooms, setRooms] = useState(getInitialRooms)
 
+    const userName = user?.displayName || user?.name?.givenName || 'Usuario';
+    const userAvatar = user?.photos?.[0]?.value || `https://ui-avatars.com/api/?name=${userName}&background=3A7CA5&color=fff`
+
     // Sistema de invitaciones simulado - TODO: Reemplazar con API real
     const userInvitations = useMemo(() => {
         return user?.role === USER_ROLES.TEACHER ? ['room-2'] : []
@@ -242,16 +245,16 @@ export function Dashboard() {
                     </a>
 
                     <nav className="user-menu" aria-label="Menú de usuario">
-                        <div className="user-info" role="status" aria-label={`Usuario: ${user?.name}`}>
+                        <div className="user-info" role="status" aria-label={`Usuario: ${userName}`}>
                             <img
-                                src={user?.avatar}
+                                src={userAvatar}
                                 alt=""
                                 className="user-avatar"
                                 width="40"
                                 height="40"
                             />
                             <div className="user-details">
-                                <p className="user-name">{user?.name}</p>
+                                <p className="user-name">{userName}</p>
                                 <p className="user-role">{getRoleLabel(user?.role)}</p>
                             </div>
                         </div>
@@ -283,7 +286,7 @@ export function Dashboard() {
                 <div className="dashboard-content">
                     {/* Welcome Section */}
                     <section className="welcome-section" aria-labelledby="welcome-heading">
-                        <h2 id="welcome-heading">👋 ¡Bienvenido/a, {user?.name}!</h2>
+                        <h2 id="welcome-heading">👋 ¡Bienvenido/a, {userName}!</h2>
                         <p>✨ Has ingresado exitosamente a Ring de Batalla - AnonGard</p>
                     </section>
 

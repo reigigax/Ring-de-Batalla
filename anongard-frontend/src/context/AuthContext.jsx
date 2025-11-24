@@ -1,12 +1,4 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import {
-  loginWithGoogle,
-  loginWithMicrosoft,
-  logout as authServiceLogout,
-  getCurrentUser,
-  isAuthenticated as checkAuthenticated,
-  saveSession,
-} from '../services/authService'
 
 // Crear contexto
 const AuthContext = createContext(null)
@@ -23,18 +15,26 @@ export function AuthProvider({ children }) {
 
   // Verificar si hay sesión al montar
   useEffect(() => {
-    const checkSession = () => {
+    const checkSession = async () => {
       try {
-        if (checkAuthenticated()) {
-          const currentUser = getCurrentUser()
-          if (currentUser) {
-            const userFromStorage = localStorage.getItem('user')
-            setUser(JSON.parse(userFromStorage))
-            setIsAuthenticated(true)
+        const response = await fetch('http://localhost:3000/api/usuario-actual', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok){
+          const data = await response.json();
+          if(data.authenticated && data.user) {
+            console.log("✅ Sesión recuperada:", data.user.displayName);
+            setUser(data.user);
+            setIsAuthenticated(true);
           }
         }
       } catch (err) {
-        console.error('Error verificando sesión:', err)
+        console.log("ℹ️ Usuario no autenticado o servidor desconectado");
       } finally {
         setIsLoading(false)
       }
@@ -44,44 +44,29 @@ export function AuthProvider({ children }) {
   }, [])
 
   // Login con Google
-  const login = useCallback(async (provider = 'google') => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      let authData
-      if (provider === 'google') {
-        authData = await loginWithGoogle()
-      } else if (provider === 'microsoft') {
-        authData = await loginWithMicrosoft()
-      } else {
-        throw new Error('Provider no soportado')
-      }
-
-      // Guardar sesión
-      saveSession(authData)
-
-      // Actualizar estado
-      setUser(authData.user)
-      setIsAuthenticated(true)
-
-      return authData
-    } catch (err) {
-      const errorMessage = err.message || 'Error en la autenticación'
-      setError(errorMessage)
-      console.error('Error en login:', err)
-      throw err
-    } finally {
-      setIsLoading(false)
+  const login = useCallback((provider = 'google') => {
+    setIsLoading(true);
+    if (provider === 'google') {
+      window.location.href = "http://localhost:3000/auth/google";
+    } else {
+      alert("Solo Google está configurado por el momento")
+      setIsLoading(false);
     }
-  }, [])
+  }, []);
 
   // Logout
-  const logout = useCallback(() => {
-    authServiceLogout()
-    setUser(null)
-    setIsAuthenticated(false)
-    setError(null)
+  const logout = useCallback(async () => {
+    try {
+      await fetch('http://localhost:3000/logout', {
+        credentials: 'include'
+      });
+    } catch(error) {
+      console.error(error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      window.location.href = '/';
+    }
   }, [])
 
   const value = {
