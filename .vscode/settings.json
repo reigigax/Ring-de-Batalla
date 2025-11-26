@@ -1,0 +1,19 @@
+{
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "172.23.132.95",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "ring_db",
+            "database": "ring_auth",
+            "username": "ring_user",
+            "password": "ringpass123"
+        }
+    ]
+}
