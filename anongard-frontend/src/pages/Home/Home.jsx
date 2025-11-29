@@ -14,8 +14,10 @@ export function Home() {
         navigate('/')
     }
 
-    const userName = user?.displayName || user?.name?.givenName || 'Usuario';
-    const userAvatar = user?.photos?.[0]?.value || `https://ui-avatars.com/api/?name=${userName}&background=3A7CA5&color=fff`
+    // Usar los campos de la base de datos
+    const userName = user?.nombre || 'Usuario';
+    const userAvatar = user?.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3A7CA5&color=fff`;
+    const userRole = user?.rol || 'Estudiante';
 
     return (
         <div className="home-container">
@@ -47,12 +49,14 @@ export function Home() {
                     {/* Welcome Card */}
                     <div className="welcome-card">
                         <div className="welcome-header">
-                            <img src={userAvatar} 
+                            <img src={userAvatar}
                                 alt="Perfil" className="welcome-avatar" />
                             <div className="welcome-info">
                                 <h2>👋 ¡Bienvenido/a, {userName}!</h2>
                                 <p className="welcome-subtitle">
-                                    {user?.role === 'teacher' ? '👨‍🏫 Profesor/a' : '🎓 Estudiante'} de AnonGard
+                                    {userRole === 'Profesor' ? '👨‍🏫 Profesor/a' :
+                                        userRole === 'Alumno' ? '🎓 Estudiante' :
+                                            userRole === 'Funcionario' ? '👔 Funcionario' : '🎓 Estudiante'} de AnonGard
                                 </p>
                             </div>
                         </div>
@@ -87,7 +91,7 @@ export function Home() {
                                         <svg viewBox="0 0 24 24">
                                             <path
                                                 fill="currentColor"
-                                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-2.24-5-5-5z"
+                                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm0-13c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"
                                             />
                                         </svg>
                                     </div>

@@ -8,6 +8,7 @@ import { Profile } from './pages/Profile/Profile'
 import { DebateHistory } from './pages/DebateHistory/DebateHistory'
 import { Ring } from './pages/Ring/Ring'
 import { AuthCallback } from './pages/AuthCallback/AuthCallback'
+import { CompleteRegistration } from './pages/CompleteRegistration/CompleteRegistration'
 
 function App() {
   return (
@@ -19,6 +20,9 @@ function App() {
 
           {/* Ruta de callback para OAuth */}
           <Route path="/callback" element={<AuthCallback />} />
+
+          {/* Ruta para completar registro */}
+          <Route path="/complete-registration" element={<CompleteRegistration />} />
 
           {/* Rutas protegidas */}
           <Route

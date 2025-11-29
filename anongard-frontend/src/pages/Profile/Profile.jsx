@@ -12,9 +12,14 @@ export function Profile() {
         navigate('/')
     }
 
-    const userName = user?.displayName || user?.name?.givenName || 'Usuario';
-    const userEmail = user.emails[0].value;
-    const userAvatar = user?.photos?.[0]?.value || `https://ui-avatars.com/api/?name=${userName}&background=3A7CA5&color=fff`
+    // Usar los campos de la base de datos
+    const userName = user?.nombre || 'Usuario';
+    const userEmail = user?.email || 'email@ejemplo.com';
+    const userAvatar = user?.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3A7CA5&color=fff`;
+    const userRole = user?.rol || 'Estudiante';
+
+    // Formatear fecha de creación
+    const memberSince = user?.creado_en ? new Date(user.creado_en).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }) : 'Nov 2025';
 
     return (
         <div className="profile-container">
@@ -42,12 +47,14 @@ export function Profile() {
                     <section className="profile-section">
                         <div className="profile-card-main">
                             <div className="profile-card-header">
-                                <img src={userAvatar} className="profile-avatar-large" />
+                                <img src={userAvatar} alt="Perfil" className="profile-avatar-large" />
                                 <div className="profile-card-info">
                                     <h2>{userName}</h2>
                                     <p className="profile-email">{userEmail}</p>
-                                    <span className={`profile-role ${user?.role}`}>
-                                        {user?.role === 'teacher' ? '👨‍🏫 Profesor/a' : '🎓 Estudiante'}
+                                    <span className={`profile-role ${userRole?.toLowerCase()}`}>
+                                        {userRole === 'Profesor' ? '👨‍🏫 Profesor/a' :
+                                            userRole === 'Alumno' ? '🎓 Estudiante' :
+                                                userRole === 'Funcionario' ? '👔 Funcionario' : '🎓 Estudiante'}
                                     </span>
                                 </div>
                             </div>
@@ -55,7 +62,7 @@ export function Profile() {
                             <div className="profile-meta">
                                 <div className="meta-item">
                                     <span className="meta-label">Miembro Desde</span>
-                                    <span className="meta-value">Nov 2025</span>
+                                    <span className="meta-value">{memberSince}</span>
                                 </div>
                                 <div className="meta-item">
                                     <span className="meta-label">Estado</span>

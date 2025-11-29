@@ -6,7 +6,7 @@ import { LoadingSpinner } from '../components/common/LoadingSpinner'
  * Componente que protege rutas que requieren autenticación
  */
 export function ProtectedRoute({ children }) {
-    const { isAuthenticated, isLoading } = useAuth()
+    const { isAuthenticated, isLoading, user } = useAuth()
 
     if (isLoading) {
         return (
@@ -16,6 +16,11 @@ export function ProtectedRoute({ children }) {
 
     if (!isAuthenticated) {
         return <Navigate to="/" replace />
+    }
+
+    // Verificar si el usuario completó el registro
+    if (user && user.registro_completo === 0) {
+        return <Navigate to="/complete-registration" replace />
     }
 
     return children

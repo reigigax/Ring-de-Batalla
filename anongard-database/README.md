@@ -14,7 +14,7 @@ Dentro de esta extencion debes de configurar la base de datos con los siguientes
     Connection group:   
     Connect using:      Server and Port
     Server Address:     localhost
-    Port:               3306
+    Port:               3307
     Database:           ring_auth
     Username:           ring_user
     Password:           ringpass123

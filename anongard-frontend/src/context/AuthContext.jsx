@@ -25,10 +25,10 @@ export function AuthProvider({ children }) {
           }
         });
 
-        if (response.ok){
+        if (response.ok) {
           const data = await response.json();
-          if(data.authenticated && data.user) {
-            console.log("✅ Sesión recuperada:", data.user.displayName);
+          if (data.authenticated && data.user) {
+            console.log("✅ Sesión recuperada:", data.user.nombre || data.user.email);
             setUser(data.user);
             setIsAuthenticated(true);
           }
@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
       await fetch('http://localhost:3000/logout', {
         credentials: 'include'
       });
-    } catch(error) {
+    } catch (error) {
       console.error(error);
     } finally {
       setUser(null);
