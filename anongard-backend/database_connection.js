@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const mysql = require('mysql2');
 
 const pool = mysql.createPool({
@@ -13,7 +13,7 @@ const pool = mysql.createPool({
 });
 
 pool.getConnection((err, connection) => {
-    if (err){
+    if (err) {
         console.log('Error con la conexion a la Base de Datos ', err);
         return;
     } else {

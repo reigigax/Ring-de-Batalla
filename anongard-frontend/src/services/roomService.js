@@ -87,5 +87,26 @@ export const roomService = {
         });
         if (!response.ok) throw new Error('Error al obtener historial');
         return response.json();
+    },
+
+    async downloadPDF(salaId) {
+        const response = await fetch(`${API_URL}/resumenes/${salaId}/pdf`, {
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Error al descargar PDF');
+
+        // Convertir respuesta a Blob
+        const blob = await response.blob();
+
+        // Crear URL y forzar descarga
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Resumen_Debate_${salaId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
     }
 };

@@ -74,7 +74,8 @@ export function Ring() {
         try {
             await roomService.end(roomId.replace('room-', ''), {
                 acuerdo: agreement,
-                duracion: duration
+                duracion: duration,
+                chatHistory: messages
             });
             navigate('/dashboard');
         } catch (error) {

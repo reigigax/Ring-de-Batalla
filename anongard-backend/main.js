@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const cors = require('cors');
 const express = require('express');
 const session = require('express-session');
@@ -6,6 +6,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const SamlStrategy = require('passport-saml').Strategy;
 const db = require('./database_connection');
+const PDFDocument = require('pdfkit');
 
 const app = express();
 
@@ -309,7 +310,7 @@ app.post('/api/salas/:id/finalizar', async (req, res) => {
     }
 
     const salaId = req.params.id.replace('room-', '');
-    const { acuerdo, duracion } = req.body;
+    const { acuerdo, duracion, chatHistory } = req.body;
 
     try {
         // Verificar propiedad
@@ -329,9 +330,9 @@ app.post('/api/salas/:id/finalizar', async (req, res) => {
         // Generar resumen si corresponde
         if (sala[0].generar_pdf === 1) {
             await db.query(
-                `INSERT INTO resumenes (sala_id, texto_resumen, generado_por) 
-                 VALUES (?, ?, ?)`,
-                [salaId, `Resumen generado automáticamente para el debate: ${sala[0].titulo}. Acuerdo: ${acuerdo}`, req.user.id]
+                `INSERT INTO resumenes (sala_id, texto_resumen, chat_export, generado_por) 
+                 VALUES (?, ?, ?, ?)`,
+                [salaId, `Resumen generado automáticamente para el debate: ${sala[0].titulo}. Acuerdo: ${acuerdo}`, JSON.stringify(chatHistory || []), req.user.id]
             );
         }
 
@@ -339,6 +340,91 @@ app.post('/api/salas/:id/finalizar', async (req, res) => {
     } catch (error) {
         console.error('Error al finalizar sala:', error);
         res.status(500).json({ error: 'Error al finalizar la sala' });
+    }
+});
+
+// Descargar PDF del resumen
+app.get('/api/resumenes/:salaId/pdf', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const salaId = req.params.salaId;
+
+    try {
+        // Obtener datos del resumen, sala y participantes
+        const [resumen] = await db.query(
+            `SELECT r.*, s.titulo, s.duracion_real, s.creada_en, s.acuerdo_alcanzado 
+             FROM resumenes r 
+             JOIN salas_debate s ON r.sala_id = s.id 
+             WHERE s.id = ?`,
+            [salaId]
+        );
+
+        if (resumen.length === 0) {
+            return res.status(404).json({ error: 'Resumen no encontrado' });
+        }
+
+        const data = resumen[0];
+        const chatHistory = data.chat_export ? JSON.parse(data.chat_export) : [];
+
+        // Obtener participantes
+        const [participantes] = await db.query(
+            `SELECT u.nombre, p.rol_en_sala 
+             FROM participantes_sala p 
+             JOIN users u ON p.usuario_id = u.id 
+             WHERE p.sala_id = ?`,
+            [salaId]
+        );
+
+        // Crear PDF
+        const doc = new PDFDocument();
+
+        // Configurar headers para descarga
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Resumen_Debate_${salaId}.pdf`);
+
+        doc.pipe(res);
+
+        // Título
+        doc.fontSize(20).text(`Resumen de Debate: ${data.titulo}`, { align: 'center' });
+        doc.moveDown();
+
+        // Información General
+        doc.fontSize(12).text(`Fecha: ${new Date(data.creada_en).toLocaleDateString()}`);
+        doc.text(`Duración: ${Math.floor(data.duracion_real / 60)} min ${data.duracion_real % 60} s`);
+        doc.moveDown();
+
+        // Acuerdo
+        doc.fontSize(14).text('Acuerdo / Conclusiones:', { underline: true });
+        doc.fontSize(12).text(data.acuerdo_alcanzado || 'No registrado');
+        doc.moveDown();
+
+        // Participantes
+        doc.fontSize(14).text('Participantes:', { underline: true });
+        doc.fontSize(12);
+        participantes.forEach(p => {
+            doc.text(`- ${p.nombre} (${p.rol_en_sala})`);
+        });
+        doc.moveDown();
+
+        // Historial de Chat
+        if (chatHistory.length > 0) {
+            doc.addPage();
+            doc.fontSize(16).text('Historial del Chat', { align: 'center' });
+            doc.moveDown();
+
+            chatHistory.forEach(msg => {
+                doc.fontSize(10).fillColor('grey').text(`${new Date(msg.timestamp).toLocaleTimeString()} - ${msg.user}:`, { continued: true });
+                doc.fillColor('black').text(` ${msg.text}`);
+            });
+        }
+
+        doc.end();
+
+    } catch (error) {
+        console.error('Error al generar PDF:', error);
+        res.status(500).json({ error: 'Error al generar PDF' });
     }
 });
 
