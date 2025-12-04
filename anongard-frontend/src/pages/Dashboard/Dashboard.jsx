@@ -344,7 +344,6 @@ export function Dashboard() {
                                         >
                                             <div className="room-card-inner">
                                                 <div className={`room-header ${colorClass}`} aria-hidden="true">
-                                                    <RoomIcon />
                                                     {isCreator && (
                                                         <button
                                                             className="delete-room-btn"

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/common/Button'
 import { roomService } from '../../services/roomService'
 import './DebateHistory.css'
+import anongardLogo from '../../assets/anongard-logo.png'
 
 
 export function DebateHistory() {
@@ -146,23 +147,15 @@ export function DebateHistory() {
                                         </div>
                                     </div>
                                     <div className="debate-actions">
-                                        {debate.generar_pdf === 1 && (
-                                            <button
-                                                className="action-btn view-report"
-                                                onClick={() => roomService.downloadPDF(debate.id)}
-                                            >
-                                                <svg viewBox="0 0 24 24">
-                                                    <path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
-                                                </svg>
-                                                Descargar PDF
-                                            </button>
-                                        )}
-                                        <button className="action-btn view-details">
-                                            <svg viewBox="0 0 24 24">
+                                        <Button
+                                            variant="primary"
+                                            onClick={() => navigate(`/debate/${debate.id}`)}
+                                        >
+                                            <svg viewBox="0 0 24 24" style={{ width: '18px', height: '18px', marginRight: '8px' }}>
                                                 <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                                             </svg>
-                                            Ver Detalles
-                                        </button>
+                                            Ver Detalles del Debate
+                                        </Button>
                                     </div>
                                 </div>
                             ))}

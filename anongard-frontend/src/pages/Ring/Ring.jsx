@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/common/Button'
 import { roomService } from '../../services/roomService'
 import './Ring.css'
+import { useSocket } from '../../context/SocketContext'
 
 export function Ring() {
     const { roomId } = useParams()
@@ -17,24 +18,37 @@ export function Ring() {
     const [showEndModal, setShowEndModal] = useState(false)
     const [agreement, setAgreement] = useState('')
     const [isEnding, setIsEnding] = useState(false)
+    const [showInviteModal, setShowInviteModal] = useState(false)
+    const [contacts, setContacts] = useState([])
+    const [isDebateStarted, setIsDebateStarted] = useState(false)
+    const [showCountdown, setShowCountdown] = useState(false)
+    const [countdown, setCountdown] = useState(5)
+    const [showParticipantEndModal, setShowParticipantEndModal] = useState(false)
+    const [finalAgreement, setFinalAgreement] = useState('')
+    const [agreedToTerms, setAgreedToTerms] = useState(false)
+    const socket = useSocket()
 
-    // Cargar datos de la sala
+    // Cargar datos de la sala y registrarse como participante
     useEffect(() => {
         const fetchRoomData = async () => {
             try {
-                // En una implementación real, aquí cargaríamos los detalles de la sala desde la API
-                // Por ahora usamos los datos básicos que tenemos o simulamos
-                // TODO: Implementar endpoint GET /api/salas/:id para obtener detalles completos
-
                 // Simulamos obtener datos básicos
                 const rooms = await roomService.getAll();
                 const currentRoom = rooms.find(r => r.id === roomId);
 
                 if (currentRoom) {
                     setRoom(currentRoom);
+
+                    // Registrarse automáticamente como participante
+                    try {
+                        await roomService.join(roomId.replace('room-', ''));
+                        console.log('Usuario registrado como participante');
+                    } catch (joinError) {
+                        console.error('Error al registrarse como participante:', joinError);
+                        // Continuar de todos modos, el socket también registra
+                    }
                 } else {
                     // Si no está en la lista (ej. recarga), redirigir o mostrar error
-                    // Por simplicidad, redirigimos
                     navigate('/dashboard');
                 }
             } catch (error) {
@@ -45,14 +59,83 @@ export function Ring() {
         fetchRoomData();
     }, [roomId, navigate]);
 
-    // Timer para duración del debate
+    // Socket: Join room and listen for real-time events
     useEffect(() => {
+        if (socket && user && roomId) {
+            const salaId = roomId.replace('room-', '');
+
+            // Join debate room
+            socket.emit('join_debate_room', { salaId, userId: user.id });
+
+            // Listen for participants updates
+            socket.on('participants_update', (updatedParticipants) => {
+                setParticipants(updatedParticipants);
+            });
+
+            // Listen for chat messages
+            socket.on('chat_message', (message) => {
+                setMessages(prev => [...prev, message]);
+            });
+
+            // Listen for timer sync
+            socket.on('room_timer_sync', ({ elapsedSeconds }) => {
+                setDuration(elapsedSeconds);
+                setIsDebateStarted(true);
+            });
+
+            // Listen for countdown start
+            socket.on('debate_countdown_start', () => {
+                setShowCountdown(true);
+                setCountdown(5);
+            });
+
+            // Listen for debate started
+            socket.on('debate_started', () => {
+                setIsDebateStarted(true);
+                setShowCountdown(false);
+            });
+
+            // Listen for debate ended
+            socket.on('debate_ended', ({ acuerdo }) => {
+                console.log('Debate ended event received:', acuerdo);
+                setIsDebateStarted(false);
+                setFinalAgreement(acuerdo);
+                // Show modal for all participants (creator will navigate away)
+                setShowParticipantEndModal(true);
+            });
+
+            return () => {
+                socket.emit('leave_debate_room', { salaId, userId: user.id });
+                socket.off('participants_update');
+                socket.off('chat_message');
+                socket.off('room_timer_sync');
+                socket.off('debate_countdown_start');
+                socket.off('debate_started');
+                socket.off('debate_ended');
+            };
+        }
+    }, [socket, user, roomId]);
+
+    // Countdown effect
+    useEffect(() => {
+        if (showCountdown && countdown > 0) {
+            const timer = setTimeout(() => {
+                setCountdown(prev => prev - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [showCountdown, countdown]);
+
+    // Timer increment (only when debate is running)
+    useEffect(() => {
+        if (!isDebateStarted) return;
+
         const interval = setInterval(() => {
             setDuration(prev => prev + 1)
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [])
+    }, [isDebateStarted])
 
     const formatDuration = (seconds) => {
         const mins = Math.floor(seconds / 60)
@@ -61,7 +144,18 @@ export function Ring() {
     }
 
     const handleLeaveRoom = () => {
+        if (socket && user && roomId) {
+            const salaId = roomId.replace('room-', '');
+            socket.emit('leave_debate_room', { salaId, userId: user.id });
+        }
         navigate('/dashboard')
+    }
+
+    const handleStartDebate = () => {
+        if (socket && roomId) {
+            const salaId = roomId.replace('room-', '');
+            socket.emit('start_debate_timer', { salaId });
+        }
     }
 
     const handleEndDebate = async () => {
@@ -72,11 +166,21 @@ export function Ring() {
 
         setIsEnding(true);
         try {
-            await roomService.end(roomId.replace('room-', ''), {
+            const salaId = roomId.replace('room-', '');
+
+            // Close participant modal for moderator (in case it opens)
+            setShowParticipantEndModal(false);
+
+            // Emit socket event to end debate
+            socket.emit('end_debate_with_agreement', {
+                salaId,
                 acuerdo: agreement,
                 duracion: duration,
                 chatHistory: messages
             });
+
+            // Close modal and navigate immediately for moderator
+            setShowEndModal(false);
             navigate('/dashboard');
         } catch (error) {
             console.error('Error al finalizar debate:', error);
@@ -86,9 +190,17 @@ export function Ring() {
         }
     }
 
+    const handleParticipantClose = () => {
+        if (agreedToTerms) {
+            navigate('/dashboard');
+        } else {
+            alert('Por favor acepta los términos acordados para continuar.');
+        }
+    }
+
     const handleSendMessage = (e) => {
         e.preventDefault()
-        if (newMessage.trim()) {
+        if (newMessage.trim() && socket && roomId) {
             const message = {
                 id: Date.now(),
                 user: user?.nombre || user?.name,
@@ -96,10 +208,38 @@ export function Ring() {
                 text: newMessage,
                 timestamp: new Date()
             }
-            setMessages([...messages, message])
+            const salaId = roomId.replace('room-', '');
+            socket.emit('send_chat_message', { salaId, message });
             setNewMessage('')
         }
     }
+
+    const handleOpenInvite = async () => {
+        setShowInviteModal(true);
+        try {
+            const response = await fetch('http://localhost:3000/api/users', { credentials: 'include' });
+            const data = await response.json();
+            // Filtrar usuarios que ya están en la sala (simplificado)
+            setContacts(data);
+        } catch (error) {
+            console.error('Error fetching contacts:', error);
+        }
+    };
+
+    const handleInvite = async (userId) => {
+        try {
+            await fetch('http://localhost:3000/api/invitaciones', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ receptorId: userId, salaId: room.id.replace('room-', '') })
+            });
+            alert('Invitación enviada');
+        } catch (error) {
+            console.error('Error sending invitation:', error);
+            alert('Error al enviar invitación');
+        }
+    };
 
     if (!room) {
         return <div className="ring-loading">Cargando sala...</div>
@@ -126,12 +266,21 @@ export function Ring() {
                             <span>{formatDuration(duration)}</span>
                         </div>
 
-                        {isCreator && (
+                        {isCreator && !isDebateStarted && (
+                            <Button variant="success" onClick={handleStartDebate}>
+                                ▶️ Iniciar Debate
+                            </Button>
+                        )}
+
+                        {isCreator && isDebateStarted && (
                             <Button variant="primary" onClick={() => setShowEndModal(true)}>
                                 Finalizar Debate
                             </Button>
                         )}
 
+                        <Button variant="secondary" onClick={handleOpenInvite} style={{ marginRight: '10px' }}>
+                            Invitar
+                        </Button>
                         <Button variant="danger" onClick={handleLeaveRoom}>
                             Salir
                         </Button>
@@ -175,18 +324,30 @@ export function Ring() {
                     <div className="participants-section">
                         <h3>Participantes ({participants.length})</h3>
                         <div className="participants-list">
-                            {participants.map(participant => (
-                                <div key={participant.id} className="participant-card">
-                                    <img src={participant.avatar} alt={participant.name} className="participant-avatar" />
-                                    <div className="participant-info">
-                                        <span className="participant-name">{participant.name}</span>
-                                        <span className="participant-role">
-                                            {participant.role === 'teacher' ? '👨‍🏫 Profesor' : '🎓 Estudiante'}
-                                        </span>
+                            {participants.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: '#6b7280', fontSize: '14px' }}>
+                                    Esperando participantes...
+                                </p>
+                            ) : (
+                                participants.map(participant => (
+                                    <div key={participant.userId} className="participant-card">
+                                        <img
+                                            src={participant.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(participant.nombre)}&background=3A7CA5&color=fff`}
+                                            alt={participant.nombre}
+                                            className="participant-avatar"
+                                        />
+                                        <div className="participant-info">
+                                            <span className="participant-name">{participant.nombre}</span>
+                                            <span className="participant-role">
+                                                {participant.rol === 'Profesor' ? '👨‍🏫 Profesor' :
+                                                    participant.rol === 'Alumno' ? '🎓 Estudiante' :
+                                                        '👔 Funcionario'}
+                                            </span>
+                                        </div>
+                                        <div className="participant-status active"></div>
                                     </div>
-                                    <div className={`participant-status ${participant.status}`}></div>
-                                </div>
-                            ))}
+                                ))
+                            )}
                         </div>
                     </div>
 
@@ -225,6 +386,36 @@ export function Ring() {
                 </aside>
             </div>
 
+            {/* Invite Modal */}
+            {showInviteModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ maxWidth: '500px' }}>
+                        <h2>Invitar Contactos</h2>
+                        <div className="invite-list" style={{ maxHeight: '300px', overflowY: 'auto', margin: '1rem 0' }}>
+                            {contacts.map(contact => (
+                                <div key={contact.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem', borderBottom: '1px solid #eee' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <img src={contact.foto_perfil || 'https://via.placeholder.com/40'} alt={contact.nombre} style={{ width: '40px', height: '40px', borderRadius: '50%' }} />
+                                        <div>
+                                            <p style={{ margin: 0, fontWeight: 'bold' }}>{contact.nombre}</p>
+                                            <span style={{ fontSize: '0.8rem', color: contact.status === 'online' ? 'green' : 'grey' }}>
+                                                {contact.status === 'online' ? 'Conectado' : 'Desconectado'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Button size="small" onClick={() => handleInvite(contact.id)}>Invitar</Button>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="modal-actions">
+                            <Button variant="secondary" onClick={() => setShowInviteModal(false)}>
+                                Cerrar
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* End Debate Modal */}
             {showEndModal && (
                 <div className="modal-overlay">
@@ -242,8 +433,60 @@ export function Ring() {
                             <Button variant="secondary" onClick={() => setShowEndModal(false)} disabled={isEnding}>
                                 Cancelar
                             </Button>
-                            <Button variant="primary" onClick={handleEndDebate} disabled={isEnding}>
-                                {isEnding ? 'Finalizando...' : 'Confirmar y Finalizar'}
+                            <Button variant="primary" onClick={handleEndDebate} isLoading={isEnding}>
+                                Confirmar y Finalizar
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Countdown Modal */}
+            {showCountdown && (
+                <div className="modal-overlay" style={{ zIndex: 1000 }}>
+                    <div className="modal-content" style={{ textAlign: 'center', maxWidth: '400px' }}>
+                        <div style={{ fontSize: '80px', fontWeight: 'bold', color: '#3A7CA5', margin: '20px 0' }}>
+                            {countdown}
+                        </div>
+                        <h2 style={{ margin: '10px 0' }}>El debate comenzará en...</h2>
+                        <p style={{ color: '#6b7280' }}>Prepárate para participar</p>
+                    </div>
+                </div>
+            )}
+
+            {/* Participant End Modal */}
+            {showParticipantEndModal && (
+                <div className="modal-overlay" style={{ zIndex: 1000 }}>
+                    <div className="modal-content" style={{ maxWidth: '500px' }}>
+                        <h2>🎉 Gracias por tu participación</h2>
+                        <p style={{ margin: '20px 0', fontSize: '16px', lineHeight: '1.6' }}>
+                            El debate ha finalizado. A continuación se presentan los acuerdos alcanzados:
+                        </p>
+                        <div style={{
+                            background: '#f3f4f6',
+                            padding: '15px',
+                            borderRadius: '8px',
+                            margin: '20px 0',
+                            maxHeight: '200px',
+                            overflowY: 'auto'
+                        }}>
+                            <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{finalAgreement}</p>
+                        </div>
+                        <div style={{ margin: '20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <input
+                                type="checkbox"
+                                id="agreeTerms"
+                                checked={agreedToTerms}
+                                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                            />
+                            <label htmlFor="agreeTerms" style={{ cursor: 'pointer', fontSize: '14px' }}>
+                                Acepto los términos acordados en este debate
+                            </label>
+                        </div>
+                        <div className="modal-actions">
+                            <Button variant="primary" onClick={handleParticipantClose}>
+                                Cerrar
                             </Button>
                         </div>
                     </div>

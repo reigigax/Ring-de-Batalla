@@ -3,15 +3,51 @@ import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/common/Button'
 import './Home.css'
 import anongardLogo from '../../assets/anongard-logo.png'
+import { useSocket } from '../../context/SocketContext'
+import { useState, useEffect } from 'react'
 
 
 export function Home() {
     const navigate = useNavigate()
     const { user, logout } = useAuth()
+    const socket = useSocket()
+    const [unreadInvitations, setUnreadInvitations] = useState(0)
+
+    // Fetch initial unread count
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await fetch('http://localhost:3000/api/invitaciones/pendientes', { credentials: 'include' });
+                const data = await response.json();
+                setUnreadInvitations(data.length);
+            } catch (error) {
+                console.error('Error fetching invitations:', error);
+            }
+        };
+        fetchUnreadCount();
+    }, []);
+
+    // Listen for new invitations in real-time
+    useEffect(() => {
+        if (socket) {
+            socket.on('invitation_received', () => {
+                setUnreadInvitations(prev => prev + 1);
+            });
+
+            return () => {
+                socket.off('invitation_received');
+            };
+        }
+    }, [socket]);
 
     const handleLogout = () => {
         logout()
         navigate('/')
+    }
+
+    const handleMessagesClick = () => {
+        setUnreadInvitations(0); // Reset badge when opening messages
+        navigate('/messages');
     }
 
     // Usar los campos de la base de datos
@@ -33,13 +69,50 @@ export function Home() {
                         />
                         <h1>Ring de Batalla</h1>
                     </div>
-                    <Button
-                        variant="danger"
-                        className="logout-btn-header"
-                        onClick={handleLogout}
-                    >
-                        Salir
-                    </Button>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        {/* Messages/Notifications Button */}
+                        <div style={{ position: 'relative' }}>
+                            <Button
+                                variant="secondary"
+                                onClick={handleMessagesClick}
+                                style={{ position: 'relative' }}
+                            >
+                                <svg viewBox="0 0 24 24" style={{ width: '20px', height: '20px', fill: 'currentColor', marginRight: '6px' }}>
+                                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                                </svg>
+                                Mensajes
+                            </Button>
+                            {unreadInvitations > 0 && (
+                                <span style={{
+                                    position: 'absolute',
+                                    top: '-8px',
+                                    right: '-8px',
+                                    background: '#ff4444',
+                                    color: 'white',
+                                    borderRadius: '50%',
+                                    width: '22px',
+                                    height: '22px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    border: '2px solid white',
+                                    animation: 'pulse 2s infinite',
+                                    zIndex: 10
+                                }}>
+                                    {unreadInvitations > 9 ? '9+' : unreadInvitations}
+                                </span>
+                            )}
+                        </div>
+                        <Button
+                            variant="danger"
+                            className="logout-btn-header"
+                            onClick={handleLogout}
+                        >
+                            Salir
+                        </Button>
+                    </div>
                 </div>
             </header>
 
