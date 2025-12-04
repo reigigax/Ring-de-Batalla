@@ -29,6 +29,10 @@ CREATE TABLE salas_debate (
   creador_id INT NOT NULL,
   estado ENUM('Programada', 'EnCurso', 'Finalizada') DEFAULT 'Programada',
   duracion_turno INT NOT NULL DEFAULT 90,
+  guardar_historial TINYINT(1) NOT NULL DEFAULT 1,
+  generar_pdf TINYINT(1) NOT NULL DEFAULT 0,
+  acuerdo_alcanzado TEXT,
+  duracion_real INT,
   creada_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (creador_id) REFERENCES users(id)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;

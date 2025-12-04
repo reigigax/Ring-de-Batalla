@@ -46,7 +46,7 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
         }
 
         // Estudiantes solo pueden crear salas generales
-        if (user?.role === 'student' && roomType === 'private') {
+        if (user?.rol === 'Alumno' && roomType === 'private') {
             setError('Solo los profesores pueden crear salas privadas')
             return
         }
@@ -95,7 +95,7 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                 name: roomName,
                 description: roomDescription,
                 type: roomType,
-                createdBy: user?.name,
+                createdBy: user?.nombre,
                 participants: 1,
                 createdAt: new Date().toISOString(),
                 // Nuevos campos
@@ -203,15 +203,15 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                                     value="private"
                                     checked={roomType === 'private'}
                                     onChange={(e) => setRoomType(e.target.value)}
-                                    disabled={isSubmitting || user?.role === 'student'}
+                                    disabled={isSubmitting || user?.rol === 'Alumno'}
                                 />
                                 <label
                                     htmlFor="privateRoom"
-                                    className={`type-label ${user?.role === 'student' ? 'disabled' : ''}`}
+                                    className={`type-label ${user?.rol === 'Alumno' ? 'disabled' : ''}`}
                                 >
                                     <span className="type-name">Sala Privada</span>
                                     <span className="type-desc">
-                                        {user?.role === 'student'
+                                        {user?.rol === 'Alumno'
                                             ? 'Solo disponible para profesores'
                                             : 'Acceso restringido por invitación'}
                                     </span>
@@ -242,7 +242,7 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                     )}
 
                     {/* Student Invitations - Only for Private Rooms */}
-                    {roomType === 'private' && user?.role === 'teacher' && (
+                    {roomType === 'private' && user?.rol !== 'Alumno' && (
                         <div className="form-group">
                             <label>Invitar Estudiantes *</label>
                             <StudentSelector

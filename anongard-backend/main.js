@@ -193,7 +193,8 @@ app.get('/api/salas', async (req, res) => {
             type: sala.type === 'General' ? 'general' : 'private',
             participants: sala.participants,
             status: sala.status === 'EnCurso' ? 'active' : 'scheduled',
-            createdAt: sala.creada_en
+            createdAt: sala.creada_en,
+            creador_id: sala.creador_id
         }));
 
         res.json(salas);
@@ -215,13 +216,20 @@ app.post('/api/salas', async (req, res) => {
             descripcion,
             tipo_sala,
             reglas,
-            duracion_turno
+            duracion_turno,
+            saveToHistory,
+            generatePDF
         } = req.body;
 
+        // Validar que alumnos no creen salas privadas
+        if (req.user.rol === 'Alumno' && tipo_sala === 'Privada') {
+            return res.status(403).json({ error: 'Los alumnos no pueden crear salas privadas' });
+        }
+
         const [result] = await db.query(
-            `INSERT INTO salas_debate (titulo, descripcion, tipo_sala, reglas, creador_id, estado, duracion_turno) 
-             VALUES (?, ?, ?, ?, ?, 'Programada', ?)`,
-            [titulo, descripcion, tipo_sala, reglas || '', req.user.id, duracion_turno || 90]
+            `INSERT INTO salas_debate (titulo, descripcion, tipo_sala, reglas, creador_id, estado, duracion_turno, guardar_historial, generar_pdf) 
+             VALUES (?, ?, ?, ?, ?, 'Programada', ?, ?, ?)`,
+            [titulo, descripcion, tipo_sala, reglas || '', req.user.id, duracion_turno || 90, saveToHistory ? 1 : 0, generatePDF ? 1 : 0]
         );
 
         // Agregar al creador como participante y moderador
@@ -254,13 +262,189 @@ app.post('/api/salas', async (req, res) => {
             type: newSala[0].type === 'General' ? 'general' : 'private',
             participants: newSala[0].participants,
             status: 'scheduled',
-            createdAt: newSala[0].creada_en
+            createdAt: newSala[0].creada_en,
+            creador_id: newSala[0].creador_id
         };
 
         res.json(sala);
     } catch (error) {
         console.error('Error al crear sala:', error);
         res.status(500).json({ error: 'Error al crear la sala' });
+    }
+});
+
+// Unirse a una sala
+app.post('/api/salas/:id/join', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const salaId = req.params.id.replace('room-', '');
+
+    try {
+        // Verificar si ya es participante
+        const [existing] = await db.query(
+            'SELECT * FROM participantes_sala WHERE sala_id = ? AND usuario_id = ?',
+            [salaId, req.user.id]
+        );
+
+        if (existing.length === 0) {
+            await db.query(
+                'INSERT INTO participantes_sala (sala_id, usuario_id, rol_en_sala) VALUES (?, ?, ?)',
+                [salaId, req.user.id, 'Participante']
+            );
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error al unirse a la sala:', error);
+        res.status(500).json({ error: 'Error al unirse a la sala' });
+    }
+});
+
+// Finalizar debate
+app.post('/api/salas/:id/finalizar', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const salaId = req.params.id.replace('room-', '');
+    const { acuerdo, duracion } = req.body;
+
+    try {
+        // Verificar propiedad
+        const [sala] = await db.query('SELECT * FROM salas_debate WHERE id = ?', [salaId]);
+
+        if (sala.length === 0) return res.status(404).json({ error: 'Sala no encontrada' });
+        if (sala[0].creador_id !== req.user.id) return res.status(403).json({ error: 'No autorizado' });
+
+        // Actualizar sala
+        await db.query(
+            `UPDATE salas_debate 
+             SET estado = 'Finalizada', acuerdo_alcanzado = ?, duracion_real = ? 
+             WHERE id = ?`,
+            [acuerdo, duracion, salaId]
+        );
+
+        // Generar resumen si corresponde
+        if (sala[0].generar_pdf === 1) {
+            await db.query(
+                `INSERT INTO resumenes (sala_id, texto_resumen, generado_por) 
+                 VALUES (?, ?, ?)`,
+                [salaId, `Resumen generado automáticamente para el debate: ${sala[0].titulo}. Acuerdo: ${acuerdo}`, req.user.id]
+            );
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error al finalizar sala:', error);
+        res.status(500).json({ error: 'Error al finalizar la sala' });
+    }
+});
+
+// Obtener historial del usuario
+app.get('/api/historial', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    try {
+        const [rows] = await db.query(
+            `SELECT 
+                s.id,
+                s.titulo,
+                s.descripcion,
+                s.tipo_sala,
+                s.creada_en,
+                s.duracion_real,
+                s.acuerdo_alcanzado,
+                s.generar_pdf,
+                COUNT(p2.id) as total_participantes,
+                MAX(r.id) as resumen_id
+            FROM participantes_sala p
+            JOIN salas_debate s ON p.sala_id = s.id
+            LEFT JOIN participantes_sala p2 ON s.id = p2.sala_id
+            LEFT JOIN resumenes r ON s.id = r.sala_id
+            WHERE p.usuario_id = ? 
+            AND s.estado = 'Finalizada'
+            AND s.guardar_historial = 1
+            GROUP BY s.id
+            ORDER BY s.creada_en DESC`,
+            [req.user.id]
+        );
+
+        res.json(rows);
+    } catch (error) {
+        console.error('Error al obtener historial:', error);
+        res.status(500).json({ error: 'Error al obtener historial' });
+    }
+});
+
+// Actualizar sala (PUT)
+app.put('/api/salas/:id', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const salaId = req.params.id.replace('room-', '');
+    const { titulo, descripcion, reglas, estado } = req.body;
+
+    try {
+        // Verificar propiedad de la sala
+        const [sala] = await db.query('SELECT creador_id FROM salas_debate WHERE id = ?', [salaId]);
+
+        if (sala.length === 0) {
+            return res.status(404).json({ error: 'Sala no encontrada' });
+        }
+
+        if (sala[0].creador_id !== req.user.id) {
+            return res.status(403).json({ error: 'No tienes permiso para editar esta sala' });
+        }
+
+        await db.query(
+            `UPDATE salas_debate 
+             SET titulo = ?, descripcion = ?, reglas = ?, estado = ?
+             WHERE id = ?`,
+            [titulo, descripcion, reglas, estado, salaId]
+        );
+
+        res.json({ success: true, message: 'Sala actualizada' });
+    } catch (error) {
+        console.error('Error al actualizar sala:', error);
+        res.status(500).json({ error: 'Error al actualizar la sala' });
+    }
+});
+
+// Eliminar sala (DELETE)
+app.delete('/api/salas/:id', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'No autenticado' });
+    }
+
+    const salaId = req.params.id.replace('room-', '');
+
+    try {
+        // Verificar propiedad de la sala
+        const [sala] = await db.query('SELECT creador_id FROM salas_debate WHERE id = ?', [salaId]);
+
+        if (sala.length === 0) {
+            return res.status(404).json({ error: 'Sala no encontrada' });
+        }
+
+        if (sala[0].creador_id !== req.user.id) {
+            return res.status(403).json({ error: 'No tienes permiso para eliminar esta sala' });
+        }
+
+        // Eliminar participantes primero (por clave foránea)
+        await db.query('DELETE FROM participantes_sala WHERE sala_id = ?', [salaId]);
+
+        // Eliminar sala
+        await db.query('DELETE FROM salas_debate WHERE id = ?', [salaId]);
+
+        res.json({ success: true, message: 'Sala eliminada' });
+    } catch (error) {
+        console.error('Error al eliminar sala:', error);
+        res.status(500).json({ error: 'Error al eliminar la sala' });
     }
 });
 

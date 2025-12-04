@@ -1,9 +1,10 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { ConfirmModal } from '../../components/common/ConfirmModal'
 import { CreateRoomModal } from '../../components/features/CreateRoomModal'
 import { Button } from '../../components/common/Button'
+import { roomService } from '../../services/roomService'
 import './Dashboard.css'
 import anongardLogo from '../../assets/anongard-logo.png'
 
@@ -19,41 +20,10 @@ const ROOM_STATUS = {
 }
 
 const USER_ROLES = {
-    TEACHER: 'teacher',
-    STUDENT: 'student'
+    TEACHER: 'Profesor', // Mapeado al backend
+    STUDENT: 'Alumno',   // Mapeado al backend
+    STAFF: 'Funcionario' // Mapeado al backend
 }
-
-const STORAGE_KEYS = {
-    ROOMS: 'rooms'
-}
-
-// Salas por defecto
-const DEFAULT_ROOMS = [
-    {
-        id: 'room-1',
-        name: 'Debate sobre Evaluaciones',
-        description: 'Discusión sobre criterios de evaluación y metodologías',
-        type: ROOM_TYPES.GENERAL,
-        participants: 3,
-        status: ROOM_STATUS.ACTIVE,
-    },
-    {
-        id: 'room-2',
-        name: 'Mediación de Conflicto',
-        description: 'Resolución de conflictos entre estudiantes (acceso restringido)',
-        type: ROOM_TYPES.PRIVATE,
-        participants: 2,
-        status: ROOM_STATUS.SCHEDULED,
-    },
-    {
-        id: 'room-3',
-        name: 'Planificación Académica',
-        description: 'Cambios en la malla curricular y planificación semestral',
-        type: ROOM_TYPES.GENERAL,
-        participants: 5,
-        status: ROOM_STATUS.ACTIVE,
-    },
-]
 
 // Iconos SVG como componentes
 const BackIcon = () => (
@@ -117,25 +87,13 @@ const ClockIcon = () => (
     </svg>
 )
 
+const TrashIcon = () => (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+    </svg>
+)
+
 // Utilidades
-const getInitialRooms = () => {
-    try {
-        const savedRooms = localStorage.getItem(STORAGE_KEYS.ROOMS)
-        return savedRooms ? JSON.parse(savedRooms) : DEFAULT_ROOMS
-    } catch (error) {
-        console.error('Error loading rooms from localStorage:', error)
-        return DEFAULT_ROOMS
-    }
-}
-
-const saveRoomsToStorage = (rooms) => {
-    try {
-        localStorage.setItem(STORAGE_KEYS.ROOMS, JSON.stringify(rooms))
-    } catch (error) {
-        console.error('Error saving rooms to localStorage:', error)
-    }
-}
-
 const getRoomColorClass = (room) => {
     if (room.type === ROOM_TYPES.PRIVATE) return 'purple'
     if (room.participants > 4) return 'green'
@@ -143,7 +101,10 @@ const getRoomColorClass = (room) => {
 }
 
 const getRoleLabel = (role) => {
-    return role === USER_ROLES.TEACHER ? 'Profesor/a' : 'Estudiante'
+    if (role === USER_ROLES.TEACHER) return 'Profesor/a'
+    if (role === USER_ROLES.STUDENT) return 'Estudiante'
+    if (role === USER_ROLES.STAFF) return 'Funcionario'
+    return 'Usuario'
 }
 
 const getStatusLabel = (status) => {
@@ -159,26 +120,57 @@ export function Dashboard() {
     const { user, logout } = useAuth()
     const [showLogoutModal, setShowLogoutModal] = useState(false)
     const [showCreateRoomModal, setShowCreateRoomModal] = useState(false)
-    const [rooms, setRooms] = useState(getInitialRooms)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(null) // ID de la sala a eliminar
+    const [rooms, setRooms] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    const userName = user?.displayName || user?.name?.givenName || 'Usuario';
-    const userAvatar = user?.photos?.[0]?.value || `https://ui-avatars.com/api/?name=${userName}&background=3A7CA5&color=fff`
+    const userName = user?.nombre || user?.displayName || 'Usuario';
+    const userAvatar = user?.foto_perfil || user?.photos?.[0]?.value || `https://ui-avatars.com/api/?name=${userName}&background=3A7CA5&color=fff`
+
+    // Cargar salas al montar
+    const fetchRooms = useCallback(async () => {
+        try {
+            setIsLoading(true)
+            const data = await roomService.getAll()
+            setRooms(data)
+        } catch (err) {
+            console.error('Error fetching rooms:', err)
+            setError('No se pudieron cargar las salas')
+        } finally {
+            setIsLoading(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchRooms()
+    }, [fetchRooms])
 
     // Sistema de invitaciones simulado - TODO: Reemplazar con API real
     const userInvitations = useMemo(() => {
-        return user?.role === USER_ROLES.TEACHER ? ['room-2'] : []
-    }, [user?.role])
+        return user?.rol === USER_ROLES.TEACHER ? ['room-2'] : []
+    }, [user?.rol])
 
     // Verificar si el usuario puede acceder a una sala
     const canAccessRoom = useCallback((room) => {
         if (room.type === ROOM_TYPES.GENERAL) return true
+        // Si es el creador, siempre puede acceder
+        if (user?.id === room.creador_id) return true
+        // TODO: Implementar lógica real de invitaciones
         return userInvitations.includes(room.id)
-    }, [userInvitations])
+    }, [userInvitations, user?.id])
 
     // Handlers
-    const handleJoinRoom = useCallback((room) => {
+    const handleJoinRoom = useCallback(async (room) => {
         if (canAccessRoom(room)) {
-            navigate(`/ring/${room.id}`)
+            try {
+                await roomService.join(room.id.replace('room-', ''));
+                navigate(`/ring/${room.id}`)
+            } catch (error) {
+                console.error('Error al unirse a la sala:', error);
+                // Opcional: mostrar error al usuario
+                navigate(`/ring/${room.id}`) // Navegar de todos modos por ahora
+            }
         }
     }, [canAccessRoom, navigate])
 
@@ -196,12 +188,43 @@ export function Dashboard() {
         setShowLogoutModal(false)
     }, [])
 
-    const handleCreateRoom = useCallback((newRoom) => {
-        const updatedRooms = [newRoom, ...rooms]
-        setRooms(updatedRooms)
-        saveRoomsToStorage(updatedRooms)
-        setShowCreateRoomModal(false)
-    }, [rooms])
+    const handleCreateRoom = useCallback(async (roomData) => {
+        try {
+            // Mapear datos del frontend al backend
+            const backendData = {
+                titulo: roomData.name,
+                descripcion: roomData.description,
+                tipo_sala: roomData.type === 'general' ? 'General' : 'Privada',
+                reglas: roomData.debateConditions,
+                duracion_turno: 90, // Default o agregar campo en el modal
+                saveToHistory: roomData.saveToHistory,
+                generatePDF: roomData.generatePDF
+            }
+
+            await roomService.create(backendData)
+            await fetchRooms() // Recargar lista
+            setShowCreateRoomModal(false)
+        } catch (err) {
+            console.error('Error creating room:', err)
+            alert('Error al crear la sala: ' + err.message)
+        }
+    }, [fetchRooms])
+
+    const handleDeleteClick = (roomId) => {
+        setShowDeleteConfirm(roomId)
+    }
+
+    const handleConfirmDelete = async () => {
+        if (!showDeleteConfirm) return
+        try {
+            await roomService.delete(showDeleteConfirm)
+            await fetchRooms()
+            setShowDeleteConfirm(null)
+        } catch (err) {
+            console.error('Error deleting room:', err)
+            alert('Error al eliminar la sala')
+        }
+    }
 
     const handleBackToHome = useCallback(() => {
         navigate('/home')
@@ -255,7 +278,7 @@ export function Dashboard() {
                             />
                             <div className="user-details">
                                 <p className="user-name">{userName}</p>
-                                <p className="user-role">{getRoleLabel(user?.role)}</p>
+                                <p className="user-role">{getRoleLabel(user?.rol)}</p>
                             </div>
                         </div>
 
@@ -297,92 +320,111 @@ export function Dashboard() {
                             <p className="rooms-subtitle">Selecciona una sala para unirte al debate</p>
                         </header>
 
-                        <div className="rooms-grid" role="list">
-                            {rooms.map((room) => {
-                                const colorClass = getRoomColorClass(room)
-                                const isAccessible = canAccessRoom(room)
-                                const buttonLabel = isAccessible ? 'Unirse' : '🔒 Privada'
-                                const buttonTitle = isAccessible
-                                    ? `Unirse a ${room.name}`
-                                    : 'Sala privada - Requiere invitación'
+                        {isLoading ? (
+                            <div className="loading-state">Cargando salas...</div>
+                        ) : error ? (
+                            <div className="error-state">{error}</div>
+                        ) : (
+                            <div className="rooms-grid" role="list">
+                                {rooms.map((room) => {
+                                    const colorClass = getRoomColorClass(room)
+                                    const isAccessible = canAccessRoom(room)
+                                    const isCreator = user?.id === room.creador_id
+                                    const buttonLabel = isAccessible ? 'Unirse' : '🔒 Privada'
+                                    const buttonTitle = isAccessible
+                                        ? `Unirse a ${room.name}`
+                                        : 'Sala privada - Requiere invitación'
 
-                                return (
-                                    <article
-                                        key={room.id}
-                                        className="room-card"
-                                        role="listitem"
-                                        aria-labelledby={`room-title-${room.id}`}
-                                    >
-                                        <div className="room-card-inner">
-                                            <div className={`room-header ${colorClass}`} aria-hidden="true">
-                                                <RoomIcon />
-                                            </div>
-
-                                            <div className="room-content">
-                                                <div className="room-title-section">
-                                                    <h4 id={`room-title-${room.id}`}>{room.name}</h4>
-                                                    <span
-                                                        className={`badge ${room.type === ROOM_TYPES.GENERAL ? 'badge-general' : 'badge-private'}`}
-                                                        aria-label={`Tipo de sala: ${getRoomTypeLabel(room.type)}`}
-                                                    >
-                                                        {getRoomTypeLabel(room.type)}
-                                                    </span>
+                                    return (
+                                        <article
+                                            key={room.id}
+                                            className="room-card"
+                                            role="listitem"
+                                            aria-labelledby={`room-title-${room.id}`}
+                                        >
+                                            <div className="room-card-inner">
+                                                <div className={`room-header ${colorClass}`} aria-hidden="true">
+                                                    <RoomIcon />
+                                                    {isCreator && (
+                                                        <button
+                                                            className="delete-room-btn"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteClick(room.id);
+                                                            }}
+                                                            title="Eliminar sala"
+                                                        >
+                                                            <TrashIcon />
+                                                        </button>
+                                                    )}
                                                 </div>
 
-                                                <p className="room-description">{room.description}</p>
+                                                <div className="room-content">
+                                                    <div className="room-title-section">
+                                                        <h4 id={`room-title-${room.id}`}>{room.name}</h4>
+                                                        <span
+                                                            className={`badge ${room.type === ROOM_TYPES.GENERAL ? 'badge-general' : 'badge-private'}`}
+                                                            aria-label={`Tipo de sala: ${getRoomTypeLabel(room.type)}`}
+                                                        >
+                                                            {getRoomTypeLabel(room.type)}
+                                                        </span>
+                                                    </div>
 
-                                                <dl className="room-stats">
-                                                    <div className="stat">
-                                                        <ParticipantsIcon />
-                                                        <dt className="visually-hidden">Participantes:</dt>
-                                                        <dd>{room.participants} participantes</dd>
-                                                    </div>
-                                                    <div className="stat">
-                                                        <StatusIcon />
-                                                        <dt className="visually-hidden">Estado:</dt>
-                                                        <dd>{getStatusLabel(room.status)}</dd>
-                                                    </div>
-                                                </dl>
+                                                    <p className="room-description">{room.description}</p>
+
+                                                    <dl className="room-stats">
+                                                        <div className="stat">
+                                                            <ParticipantsIcon />
+                                                            <dt className="visually-hidden">Participantes:</dt>
+                                                            <dd>{room.participants} participantes</dd>
+                                                        </div>
+                                                        <div className="stat">
+                                                            <StatusIcon />
+                                                            <dt className="visually-hidden">Estado:</dt>
+                                                            <dd>{getStatusLabel(room.status)}</dd>
+                                                        </div>
+                                                    </dl>
+                                                </div>
+
+                                                <Button
+                                                    className="room-join-btn"
+                                                    onClick={() => handleJoinRoom(room)}
+                                                    disabled={!isAccessible}
+                                                    title={buttonTitle}
+                                                    aria-label={buttonTitle}
+                                                >
+                                                    {buttonLabel}
+                                                </Button>
                                             </div>
+                                        </article>
+                                    )
+                                })}
 
+                                {/* Empty State - Create New Room */}
+                                <article className="room-card empty-room" role="listitem">
+                                    <div className="room-card-inner">
+                                        <div className="empty-room-content">
+                                            <div className="empty-room-icon" aria-hidden="true">
+                                                <PlusIcon />
+                                            </div>
+                                            <h4>Crear nueva sala</h4>
+                                            <p>Inicia tu propio debate</p>
                                             <Button
-                                                className="room-join-btn"
-                                                onClick={() => handleJoinRoom(room)}
-                                                disabled={!isAccessible}
-                                                title={buttonTitle}
-                                                aria-label={buttonTitle}
+                                                className="room-create-btn"
+                                                onClick={handleOpenCreateRoomModal}
+                                                aria-label="Crear nueva sala de debate"
                                             >
-                                                {buttonLabel}
+                                                Crear Sala
                                             </Button>
                                         </div>
-                                    </article>
-                                )
-                            })}
-
-                            {/* Empty State - Create New Room */}
-                            <article className="room-card empty-room" role="listitem">
-                                <div className="room-card-inner">
-                                    <div className="empty-room-content">
-                                        <div className="empty-room-icon" aria-hidden="true">
-                                            <PlusIcon />
-                                        </div>
-                                        <h4>Crear nueva sala</h4>
-                                        <p>Inicia tu propio debate</p>
-                                        <Button
-                                            className="room-create-btn"
-                                            onClick={handleOpenCreateRoomModal}
-                                            aria-label="Crear nueva sala de debate"
-                                        >
-                                            Crear Sala
-                                        </Button>
                                     </div>
-                                </div>
-                            </article>
-                        </div>
+                                </article>
+                            </div>
+                        )}
                     </section>
 
                     {/* Create Room Section - Only for Teachers */}
-                    {user?.role === USER_ROLES.TEACHER && (
+                    {(user?.rol === USER_ROLES.TEACHER || user?.rol === USER_ROLES.STAFF) && (
                         <section className="create-room-section" aria-labelledby="moderator-heading">
                             <h3 id="moderator-heading">👨‍🏫 Opciones de Moderador</h3>
                             <div className="create-room-card">
@@ -390,7 +432,7 @@ export function Dashboard() {
                                     <CreateRoomIcon />
                                     <div>
                                         <h4>Crear Sala Privada</h4>
-                                        <p>Como profesor, puedes crear salas privadas para debates especializados o mediaciones</p>
+                                        <p>Como profesor/funcionario, puedes crear salas privadas para debates especializados o mediaciones</p>
                                     </div>
                                 </div>
                                 <Button
@@ -450,6 +492,17 @@ export function Dashboard() {
                 isDangerous={true}
                 onConfirm={handleConfirmLogout}
                 onCancel={handleCancelLogout}
+            />
+
+            <ConfirmModal
+                isOpen={!!showDeleteConfirm}
+                title="Eliminar Sala"
+                message="¿Estás seguro de que deseas eliminar esta sala? Esta acción no se puede deshacer."
+                confirmText="Sí, eliminar"
+                cancelText="Cancelar"
+                isDangerous={true}
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setShowDeleteConfirm(null)}
             />
 
             <CreateRoomModal

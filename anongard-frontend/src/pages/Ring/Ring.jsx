@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { Button } from '../../components/common/Button'
+import { roomService } from '../../services/roomService'
 import './Ring.css'
 
 export function Ring() {
@@ -13,91 +14,36 @@ export function Ring() {
     const [messages, setMessages] = useState([])
     const [newMessage, setNewMessage] = useState('')
     const [duration, setDuration] = useState(0)
+    const [showEndModal, setShowEndModal] = useState(false)
+    const [agreement, setAgreement] = useState('')
+    const [isEnding, setIsEnding] = useState(false)
 
-    // Simular carga de datos de la sala
+    // Cargar datos de la sala
     useEffect(() => {
-        // TODO: Reemplazar con llamada real a la API
-        // Leer salas desde localStorage (sincronizado con Dashboard)
-        const savedRooms = localStorage.getItem('rooms')
-        let roomsDatabase = {}
+        const fetchRoomData = async () => {
+            try {
+                // En una implementación real, aquí cargaríamos los detalles de la sala desde la API
+                // Por ahora usamos los datos básicos que tenemos o simulamos
+                // TODO: Implementar endpoint GET /api/salas/:id para obtener detalles completos
 
-        if (savedRooms) {
-            // Convertir array de salas a objeto con id como clave
-            const roomsArray = JSON.parse(savedRooms)
-            roomsDatabase = roomsArray.reduce((acc, room) => {
-                acc[room.id] = room
-                return acc
-            }, {})
-        } else {
-            // Salas por defecto si no hay nada en localStorage
-            roomsDatabase = {
-                'room-1': {
-                    id: 'room-1',
-                    name: 'Debate sobre Evaluaciones',
-                    type: 'general',
-                    description: 'Discusión sobre criterios de evaluación y metodologías',
-                    status: 'active',
-                    createdBy: 'Prof. García',
-                    startTime: new Date()
-                },
-                'room-2': {
-                    id: 'room-2',
-                    name: 'Mediación de Conflicto',
-                    type: 'private',
-                    description: 'Resolución de conflictos entre estudiantes (acceso restringido)',
-                    status: 'active',
-                    createdBy: 'Prof. Martínez',
-                    startTime: new Date()
-                },
-                'room-3': {
-                    id: 'room-3',
-                    name: 'Planificación Académica',
-                    type: 'general',
-                    description: 'Cambios en la malla curricular y planificación semestral',
-                    status: 'active',
-                    createdBy: 'Prof. López',
-                    startTime: new Date()
+                // Simulamos obtener datos básicos
+                const rooms = await roomService.getAll();
+                const currentRoom = rooms.find(r => r.id === roomId);
+
+                if (currentRoom) {
+                    setRoom(currentRoom);
+                } else {
+                    // Si no está en la lista (ej. recarga), redirigir o mostrar error
+                    // Por simplicidad, redirigimos
+                    navigate('/dashboard');
                 }
+            } catch (error) {
+                console.error('Error al cargar sala:', error);
             }
-        }
+        };
 
-        // Obtener la sala correspondiente al roomId
-        const selectedRoom = roomsDatabase[roomId] || {
-            id: roomId,
-            name: 'Sala no encontrada',
-            type: 'general',
-            description: 'Esta sala no existe',
-            status: 'active',
-            createdBy: 'Sistema',
-            startTime: new Date()
-        }
-
-        // Sistema de invitaciones - debe coincidir con Dashboard
-        const userInvitations = [
-            ...(user?.role === 'teacher' ? ['room-2'] : [])
-        ]
-
-        // Verificar acceso
-        const canAccess = selectedRoom.type === 'general' || userInvitations.includes(selectedRoom.id)
-
-        if (!canAccess) {
-            // Si no tiene acceso, redirigir al dashboard después de 2 segundos
-            setTimeout(() => {
-                navigate('/dashboard')
-            }, 2000)
-            setRoom({ ...selectedRoom, accessDenied: true })
-            return
-        }
-
-        const mockParticipants = [
-            { id: 1, name: 'Prof. García', role: 'teacher', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=garcia', status: 'active' },
-            { id: 2, name: 'Ana Martínez', role: 'student', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ana', status: 'active' },
-            { id: 3, name: 'Carlos López', role: 'student', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=carlos', status: 'active' }
-        ]
-
-        setRoom(selectedRoom)
-        setParticipants(mockParticipants)
-    }, [roomId, navigate, user])
+        fetchRoomData();
+    }, [roomId, navigate]);
 
     // Timer para duración del debate
     useEffect(() => {
@@ -115,8 +61,28 @@ export function Ring() {
     }
 
     const handleLeaveRoom = () => {
-        // TODO: Implementar lógica de salida (notificar al servidor, etc.)
         navigate('/dashboard')
+    }
+
+    const handleEndDebate = async () => {
+        if (!agreement.trim()) {
+            alert('Por favor ingresa el acuerdo alcanzado o conclusiones.');
+            return;
+        }
+
+        setIsEnding(true);
+        try {
+            await roomService.end(roomId.replace('room-', ''), {
+                acuerdo: agreement,
+                duracion: duration
+            });
+            navigate('/dashboard');
+        } catch (error) {
+            console.error('Error al finalizar debate:', error);
+            alert('Error al finalizar el debate');
+        } finally {
+            setIsEnding(false);
+        }
     }
 
     const handleSendMessage = (e) => {
@@ -124,8 +90,8 @@ export function Ring() {
         if (newMessage.trim()) {
             const message = {
                 id: Date.now(),
-                user: user?.name,
-                avatar: user?.avatar,
+                user: user?.nombre || user?.name,
+                avatar: user?.foto_perfil || user?.avatar,
                 text: newMessage,
                 timestamp: new Date()
             }
@@ -138,20 +104,7 @@ export function Ring() {
         return <div className="ring-loading">Cargando sala...</div>
     }
 
-    // Mostrar mensaje de acceso denegado
-    if (room.accessDenied) {
-        return (
-            <div className="ring-loading">
-                <div style={{ textAlign: 'center' }}>
-                    <h2 style={{ color: '#F8AFA6', marginBottom: '1rem' }}>🔒 Acceso Denegado</h2>
-                    <p>No tienes permiso para acceder a esta sala privada.</p>
-                    <p style={{ color: 'rgba(255, 255, 255, 0.6)', marginTop: '1rem' }}>
-                        Redirigiendo al dashboard...
-                    </p>
-                </div>
-            </div>
-        )
-    }
+    const isCreator = user?.id === room.creador_id;
 
     return (
         <div className="ring-container">
@@ -171,6 +124,13 @@ export function Ring() {
                             </svg>
                             <span>{formatDuration(duration)}</span>
                         </div>
+
+                        {isCreator && (
+                            <Button variant="primary" onClick={() => setShowEndModal(true)}>
+                                Finalizar Debate
+                            </Button>
+                        )}
+
                         <Button variant="danger" onClick={handleLeaveRoom}>
                             Salir
                         </Button>
@@ -263,6 +223,31 @@ export function Ring() {
                     </div>
                 </aside>
             </div>
+
+            {/* End Debate Modal */}
+            {showEndModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>Finalizar Debate</h2>
+                        <p>Por favor, resume los acuerdos alcanzados o conclusiones del debate.</p>
+                        <textarea
+                            value={agreement}
+                            onChange={(e) => setAgreement(e.target.value)}
+                            placeholder="Escribe aquí los acuerdos o conclusiones..."
+                            rows="5"
+                            style={{ width: '100%', margin: '1rem 0', padding: '0.5rem' }}
+                        />
+                        <div className="modal-actions">
+                            <Button variant="secondary" onClick={() => setShowEndModal(false)} disabled={isEnding}>
+                                Cancelar
+                            </Button>
+                            <Button variant="primary" onClick={handleEndDebate} disabled={isEnding}>
+                                {isEnding ? 'Finalizando...' : 'Confirmar y Finalizar'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
