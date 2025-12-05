@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import './StudentSelector.css'
 
-// Mock data - esto se reemplazará con una llamada al backend
 const MOCK_STUDENTS = [
     { id: '1', name: 'Ana García', email: 'ana.garcia@example.com' },
     { id: '2', name: 'Carlos Rodríguez', email: 'carlos.rodriguez@example.com' },
@@ -19,8 +18,6 @@ export function StudentSelector({ selectedStudents = [], onStudentsChange, disab
     const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
-        // TODO: Reemplazar con llamada real al backend
-        // fetchStudents()
         setStudents(MOCK_STUDENTS)
     }, [])
 
@@ -51,7 +48,6 @@ export function StudentSelector({ selectedStudents = [], onStudentsChange, disab
 
     return (
         <div className="student-selector">
-            {/* Search Input */}
             <div className="student-search">
                 <svg className="search-icon" viewBox="0 0 24 24">
                     <path
@@ -68,7 +64,6 @@ export function StudentSelector({ selectedStudents = [], onStudentsChange, disab
                 />
             </div>
 
-            {/* Selected Students Chips */}
             {selectedStudents.length > 0 && (
                 <div className="selected-students">
                     <span className="selected-label">
@@ -93,7 +88,6 @@ export function StudentSelector({ selectedStudents = [], onStudentsChange, disab
                 </div>
             )}
 
-            {/* Students List */}
             <div className="student-list">
                 {isLoading ? (
                     <div className="student-list-empty">Cargando estudiantes...</div>

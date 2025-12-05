@@ -9,19 +9,16 @@ import './CreateRoomModal.css'
 export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
     const { user } = useAuth()
 
-    // Basic fields
     const [roomName, setRoomName] = useState('')
     const [roomDescription, setRoomDescription] = useState('')
     const [roomType, setRoomType] = useState('general')
 
-    // New fields
     const [maxParticipants, setMaxParticipants] = useState('10')
     const [selectedStudents, setSelectedStudents] = useState([])
     const [debateConditions, setDebateConditions] = useState('')
     const [saveToHistory, setSaveToHistory] = useState(true)
     const [generatePDF, setGeneratePDF] = useState(false)
 
-    // UI state
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState(null)
 
@@ -29,7 +26,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
         e.preventDefault()
         setError(null)
 
-        // Validaciones básicas
         if (!roomName.trim()) {
             setError('El nombre de la sala es obligatorio')
             return
@@ -45,13 +41,11 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
             return
         }
 
-        // Estudiantes solo pueden crear salas generales
         if (user?.rol === 'Alumno' && roomType === 'private') {
             setError('Solo los profesores pueden crear salas privadas')
             return
         }
 
-        // Validación de límite de participantes (obligatorio para salas generales)
         if (roomType === 'general') {
             if (!maxParticipants || maxParticipants.trim() === '') {
                 setError('El límite de participantes es obligatorio para salas generales')
@@ -68,13 +62,11 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
             }
         }
 
-        // Validación de invitaciones para salas privadas
         if (roomType === 'private' && selectedStudents.length === 0) {
             setError('Debes invitar al menos un estudiante a la sala privada')
             return
         }
 
-        // Validación de condiciones del debate (obligatorio)
         if (!debateConditions.trim()) {
             setError('Las condiciones del debate son obligatorias')
             return
@@ -87,7 +79,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
         setIsSubmitting(true)
 
         try {
-            // Simular delay de creación
             await new Promise((resolve) => setTimeout(resolve, 1000))
 
             const newRoom = {
@@ -98,7 +89,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                 createdBy: user?.nombre,
                 participants: 1,
                 createdAt: new Date().toISOString(),
-                // Nuevos campos
                 maxParticipants: roomType === 'general' ? parseInt(maxParticipants) : null,
                 invitedStudents: roomType === 'private' ? selectedStudents : [],
                 debateConditions: debateConditions.trim() || null,
@@ -108,7 +98,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
 
             onCreateRoom(newRoom)
 
-            // Reset form
             resetForm()
             onClose()
         } catch (err) {
@@ -147,7 +136,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                 <h2 className="modal-title">Crear Nueva Sala</h2>
 
                 <form onSubmit={handleSubmit}>
-                    {/* Room Name */}
                     <div className="form-group">
                         <label htmlFor="roomName">Nombre de la Sala *</label>
                         <input
@@ -162,7 +150,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         <span className="char-count">{roomName.length}/50</span>
                     </div>
 
-                    {/* Room Description */}
                     <div className="form-group">
                         <label htmlFor="roomDescription">Descripción (opcional)</label>
                         <textarea
@@ -177,7 +164,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         <span className="char-count">{roomDescription.length}/200</span>
                     </div>
 
-                    {/* Room Type */}
                     <div className="form-group">
                         <label>Tipo de Sala *</label>
                         <div className="room-type-options">
@@ -220,7 +206,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         </div>
                     </div>
 
-                    {/* Max Participants - Only for General Rooms */}
                     {roomType === 'general' && (
                         <div className="form-group">
                             <label htmlFor="maxParticipants">Límite de Participantes *</label>
@@ -241,7 +226,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         </div>
                     )}
 
-                    {/* Student Invitations - Only for Private Rooms */}
                     {roomType === 'private' && user?.rol !== 'Alumno' && (
                         <div className="form-group">
                             <label>Invitar Estudiantes *</label>
@@ -256,7 +240,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         </div>
                     )}
 
-                    {/* Debate Conditions */}
                     <div className="form-group">
                         <label htmlFor="debateConditions">Condiciones del Debate *</label>
                         <textarea
@@ -275,7 +258,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         </span>
                     </div>
 
-                    {/* Configuration Options */}
                     <div className="form-group">
                         <label>Opciones de Configuración</label>
                         <div className="config-options">
@@ -298,7 +280,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         </div>
                     </div>
 
-                    {/* Error Message */}
                     {error && (
                         <div className="error-message">
                             <svg viewBox="0 0 24 24">
@@ -311,7 +292,6 @@ export function CreateRoomModal({ isOpen, onClose, onCreateRoom }) {
                         </div>
                     )}
 
-                    {/* Submit Button */}
                     <div className="form-actions">
                         <Button
                             type="button"

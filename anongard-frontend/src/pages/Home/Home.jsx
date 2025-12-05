@@ -13,7 +13,6 @@ export function Home() {
     const socket = useSocket()
     const [unreadInvitations, setUnreadInvitations] = useState(0)
 
-    // Fetch initial unread count
     useEffect(() => {
         const fetchUnreadCount = async () => {
             try {
@@ -27,7 +26,6 @@ export function Home() {
         fetchUnreadCount();
     }, []);
 
-    // Listen for new invitations in real-time
     useEffect(() => {
         if (socket) {
             socket.on('invitation_received', () => {
@@ -46,11 +44,10 @@ export function Home() {
     }
 
     const handleMessagesClick = () => {
-        setUnreadInvitations(0); // Reset badge when opening messages
+        setUnreadInvitations(0);
         navigate('/messages');
     }
 
-    // Usar los campos de la base de datos
     const userName = user?.nombre || 'Usuario';
     const userAvatar = user?.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3A7CA5&color=fff`;
     const userRole = user?.rol || 'Estudiante';

@@ -18,21 +18,18 @@ export function DebateDetails() {
     useEffect(() => {
         const fetchDebateDetails = async () => {
             try {
-                // Fetch debate details
                 const response = await fetch(`http://localhost:3000/api/salas/${debateId}`, {
                     credentials: 'include'
                 })
                 const data = await response.json()
                 setDebate(data)
 
-                // Fetch participants
                 const participantsRes = await fetch(`http://localhost:3000/api/salas/${debateId}/participantes`, {
                     credentials: 'include'
                 })
                 const participantsData = await participantsRes.json()
                 setParticipants(participantsData)
 
-                // Fetch chat history if available
                 const summaryRes = await fetch(`http://localhost:3000/api/resumenes/${debateId}`, {
                     credentials: 'include'
                 })
@@ -75,7 +72,6 @@ export function DebateDetails() {
 
     return (
         <div className="debate-details-container">
-            {/* Header */}
             <header className="debate-details-header">
                 <div className="debate-details-header-content">
                     <Button
@@ -102,10 +98,8 @@ export function DebateDetails() {
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className="debate-details-main">
                 <div className="debate-details-content">
-                    {/* Title Section */}
                     <section className="details-title-section">
                         <div>
                             <h1>{debate.titulo}</h1>
@@ -123,7 +117,6 @@ export function DebateDetails() {
                         )}
                     </section>
 
-                    {/* Info Cards */}
                     <div className="details-info-grid">
                         <div className="info-card">
                             <h3>📅 Fecha</h3>
@@ -145,7 +138,6 @@ export function DebateDetails() {
                         </div>
                     </div>
 
-                    {/* Description */}
                     {debate.descripcion && (
                         <section className="details-section">
                             <h2>Descripción</h2>
@@ -153,7 +145,6 @@ export function DebateDetails() {
                         </section>
                     )}
 
-                    {/* Agreement */}
                     {debate.acuerdo_alcanzado && (
                         <section className="details-section agreement-section">
                             <h2>✅ Acuerdos Alcanzados</h2>
@@ -163,7 +154,6 @@ export function DebateDetails() {
                         </section>
                     )}
 
-                    {/* Participants List */}
                     <section className="details-section">
                         <h2>Participantes del Debate</h2>
                         <div className="participants-grid">
@@ -187,7 +177,6 @@ export function DebateDetails() {
                         </div>
                     </section>
 
-                    {/* Chat History */}
                     {chatHistory.length > 0 && (
                         <section className="details-section">
                             <h2>💬 Historial del Chat</h2>

@@ -21,7 +21,6 @@ export function useOIDCAuth() {
       const authServerUrl = import.meta.env.VITE_AUTH_SERVER || 'http://localhost:3000'
       const redirectUri = `${window.location.origin}/callback`
 
-      // URL de redirección a Google OIDC
       const googleAuthUrl = new URL(`${authServerUrl}/oauth/authorize/google`)
       googleAuthUrl.searchParams.append('redirect_uri', redirectUri)
       googleAuthUrl.searchParams.append('response_type', 'code')
@@ -44,7 +43,6 @@ export function useOIDCAuth() {
       const authServerUrl = import.meta.env.VITE_AUTH_SERVER || 'http://localhost:3000'
       const redirectUri = `${window.location.origin}/callback`
 
-      // URL de redirección a Microsoft OIDC
       const microsoftAuthUrl = new URL(`${authServerUrl}/oauth/authorize/microsoft`)
       microsoftAuthUrl.searchParams.append('redirect_uri', redirectUri)
       microsoftAuthUrl.searchParams.append('response_type', 'code')
@@ -84,11 +82,9 @@ export function useOIDCAuth() {
 
       const data = await response.json()
 
-      // Guardar token en localStorage
       localStorage.setItem('access_token', data.accessToken)
       localStorage.setItem('refresh_token', data.refreshToken)
 
-      // Actualizar estado
       setUser(data.user)
       setIsAuthenticated(true)
 
@@ -120,7 +116,6 @@ export function useOIDCAuth() {
       })
 
       if (!response.ok) {
-        // Token expirado o inválido
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
         return null

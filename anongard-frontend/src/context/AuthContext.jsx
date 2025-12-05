@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
-// Crear contexto
 const AuthContext = createContext(null)
 
 /**
@@ -13,7 +12,6 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Verificar si hay sesión al montar
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -43,7 +41,6 @@ export function AuthProvider({ children }) {
     checkSession()
   }, [])
 
-  // Login con Google
   const login = useCallback((provider = 'google') => {
     setIsLoading(true);
     if (provider === 'google') {
@@ -54,7 +51,6 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Logout
   const logout = useCallback(async () => {
     try {
       await fetch('http://localhost:3000/logout', {

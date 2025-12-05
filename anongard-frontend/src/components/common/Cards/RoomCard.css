@@ -1,0 +1,367 @@
+/**
+ * Estilos RoomCard
+ * Componente de tarjeta moderno para mostrar salas de debate
+ * Soporta temas azul (General) y púrpura (Privada)
+ */
+
+:root {
+    --card-bg: #ffffff;
+    --card-border: #e5e7eb;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --card-shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+    --header-blue: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    --header-purple: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+
+    --primary-blue: #2196F3;
+    --primary-purple: #9C27B0;
+
+    --green-active: #10b981;
+    --green-bg: rgba(16, 185, 129, 0.1);
+    --green-border: rgba(16, 185, 129, 0.3);
+
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+}
+
+/* Tarjeta Base */
+.room-card-modern {
+    width: 100%;
+    max-width: 384px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--card-border);
+    position: relative;
+}
+
+.room-card-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+    border-color: var(--primary-blue);
+}
+
+/* Sección Header */
+.room-card-header {
+    position: relative;
+    padding: 20px;
+}
+
+.room-card-modern.purple .room-card-header {
+    background: var(--header-purple);
+}
+
+.room-card-modern.blue .room-card-header {
+    background: var(--header-blue);
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.room-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 6px;
+}
+
+.room-card-modern.purple .room-logo {
+    border: 2px solid var(--primary-purple);
+}
+
+.room-card-modern.blue .room-logo {
+    border: 2px solid var(--primary-blue);
+}
+
+.logo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    position: relative;
+    z-index: 10;
+}
+
+.room-card-modern.purple .logo-text {
+    color: var(--primary-purple);
+}
+
+.room-card-modern.blue .logo-text {
+    color: var(--primary-blue);
+}
+
+.logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Badge de Estado */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    color: var(--green-active);
+}
+
+.status-badge.available {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    color: var(--gray-600);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green-active);
+}
+
+.status-badge.available .status-dot {
+    background: var(--gray-500);
+}
+
+.status-text {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Botón Eliminar - Legacy, puede removerse si no se usa */
+.delete-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    transform: scale(1.05);
+}
+
+.delete-btn svg {
+    width: 16px;
+    height: 16px;
+    color: #ef4444;
+}
+
+.room-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+/* Info de Participantes */
+.participants-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.participants-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid var(--gray-300);
+}
+
+.participants-badge svg {
+    width: 14px;
+    height: 14px;
+}
+
+.room-card-modern.purple .participants-badge svg {
+    color: var(--primary-purple);
+}
+
+.room-card-modern.blue .participants-badge svg {
+    color: var(--primary-blue);
+}
+
+.participants-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.separator {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--gray-400);
+}
+
+.participants-label {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+
+/* Sección de Contenido */
+.room-card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.room-description {
+    color: var(--gray-600);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.room-type-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.type-icon {
+    font-size: 14px;
+}
+
+.type-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+/* Botón Unirse */
+.join-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.room-card-modern.purple .join-btn {
+    background: var(--primary-purple);
+}
+
+.room-card-modern.blue .join-btn {
+    background: var(--primary-blue);
+}
+
+.join-btn:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.room-card-modern.purple .join-btn:hover:not(.disabled) {
+    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.3);
+}
+
+.btn-text {
+    position: relative;
+    z-index: 10;
+}
+
+.btn-arrow {
+    width: 18px;
+    height: 18px;
+    position: relative;
+    z-index: 10;
+    transition: transform 0.2s ease;
+}
+
+.join-btn:hover:not(.disabled) .btn-arrow {
+    transform: translateX(3px);
+}
+
+.btn-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0);
+    transition: background 0.2s ease;
+}
+
+.join-btn:hover:not(.disabled) .btn-overlay {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.join-btn.disabled {
+    background: var(--gray-300);
+    color: var(--gray-500);
+    cursor: not-allowed;
+}
+
+.glow-effect {
+    display: none;
+}
+
+/* Diseño Responsive */
+@media (max-width: 768px) {
+    .room-card-modern {
+        max-width: 100%;
+    }
+
+    .room-title {
+        font-size: 18px;
+    }
+
+    .room-card-header,
+    .room-card-content {
+        padding: 16px;
+    }
+}

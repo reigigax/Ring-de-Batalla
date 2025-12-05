@@ -32,17 +32,15 @@ export function DebateHistory() {
         fetchHistory();
     }, []);
 
-    // Calcular estadísticas
     const totalDebates = history.length;
     const totalDuration = history.reduce((acc, curr) => acc + (curr.duracion_real || 0), 0);
     const totalHours = (totalDuration / 3600).toFixed(1);
-    const totalInteractions = history.reduce((acc, curr) => acc + (curr.total_participantes || 0), 0); // Aproximación
+    const totalInteractions = history.reduce((acc, curr) => acc + (curr.total_participantes || 0), 0);
 
     if (loading) return <div className="history-loading">Cargando historial...</div>;
 
     return (
         <div className="history-container">
-            {/* Header */}
             <header className="history-header">
                 <Button
                     className="back-button"

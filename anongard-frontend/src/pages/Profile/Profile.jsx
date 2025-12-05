@@ -12,18 +12,15 @@ export function Profile() {
         navigate('/')
     }
 
-    // Usar los campos de la base de datos
     const userName = user?.nombre || 'Usuario';
     const userEmail = user?.email || 'email@ejemplo.com';
     const userAvatar = user?.foto_perfil || `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3A7CA5&color=fff`;
     const userRole = user?.rol || 'Estudiante';
 
-    // Formatear fecha de creación
     const memberSince = user?.creado_en ? new Date(user.creado_en).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }) : 'Nov 2025';
 
     return (
         <div className="profile-container">
-            {/* Header */}
             <header className="profile-header">
                 <div className="profile-header-content">
                     <Button className="back-button" onClick={() => navigate('/home')} icon={
@@ -40,10 +37,8 @@ export function Profile() {
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className="profile-main">
                 <div className="profile-content">
-                    {/* Profile Card */}
                     <section className="profile-section">
                         <div className="profile-card-main">
                             <div className="profile-card-header">
@@ -72,7 +67,6 @@ export function Profile() {
                         </div>
                     </section>
 
-                    {/* Statistics */}
                     <section className="stats-section">
                         <h3>Estadísticas</h3>
                         <div className="stats-grid">
@@ -118,7 +112,6 @@ export function Profile() {
                         </div>
                     </section>
 
-                    {/* Badges Section */}
                     <section className="badges-section">
                         <h3>Logros Desbloqueados</h3>
                         <div className="badges-grid">
@@ -148,7 +141,6 @@ export function Profile() {
                         </div>
                     </section>
 
-                    {/* Recent Debates */}
                     <section className="recent-debates-section">
                         <h3>Debates Recientes</h3>
                         <div className="debates-list">
@@ -190,7 +182,6 @@ export function Profile() {
                         </div>
                     </section>
 
-                    {/* Settings Section */}
                     <section className="settings-section">
                         <h3>Preferencias</h3>
                         <div className="settings-list">
